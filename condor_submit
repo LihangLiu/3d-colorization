@@ -1,0 +1,19 @@
++Group="GRAD"
++Project="AI_ROBOTICS"
++ProjectDescription=""
++GPUJob=true
+Requirements=(TARGET.GPUSlot) && target.machine == "eldar-28.cs.utexas.edu"
+Environment=PATH=/lusr/opt/condor/bin/:/lusr/opt/condor/bin/:$PATH
+Environment=PYTHONPATH=/scratch/cluster/yzp12/projects/shuffle-tuple/caffe_new/python:/u/yzp12/.local/lib/python2.7/site-packages:$PYTHONPATH
+Environment=LD_LIBRARY_PATH=/scratch/cluster/yzp12/package/anaconda2/lib:/u/yzp12/caffe_install/cuda/lib64:/u/yzp12/caffe_lib:$LD_LIBRARY_PATH
+
+Universe=vanilla
+Getenv=True
+
+Log=log/foo2.log
+Output=log/out2.log
+Error=log/err2.log
+Executable=/scratch/cluster/yzp12/projects/3d-colorization/condor_executable.sh
+
+
+Queue 1
