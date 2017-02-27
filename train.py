@@ -10,7 +10,7 @@ data = dataset.read()
 batch_size = 32
 learning_rate = 0.0001
 beta1 = 0.5
-z_size = 500
+z_size = 1000
 save_interval = 1
 
 x = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 4])
@@ -70,8 +70,8 @@ with tf.Session(config=config) as sess:
 
         for j, v in enumerate(voxels[:5]):
             v = v.reshape([32, 32, 32, 4])
-	    np.save("out/epoch4_{0}-{1}.npy".format(epoch, j), v)
+	    np.save("out/epoch5_{0}-{1}.npy".format(epoch, j), v)
             #util.save_binvox(v, "out/epoch3_{0}-{1}.binvox".format(epoch, j))
 
         if epoch % save_interval == 0:
-            saver.save(sess, "params/epoch4_{0}.ckpt".format(epoch))
+            saver.save(sess, "params/epoch5_{0}.ckpt".format(epoch))

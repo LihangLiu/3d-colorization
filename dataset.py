@@ -35,7 +35,7 @@ class Dataset:
 	    vox = np.load(fname)
 	    mean = [0.5,0.5,0.5]
 	    vox[:,:,:,:3] = (vox[:,:,:,:3]-np.reshape(mean,(1,1,1,3)))/0.5
-	    vox[:,:,:,3] = (vox[:,:,:,3]-np.reshape([1],(1,1,1,1)))/0.5
+	    vox[:,:,:,3] = (vox[:,:,:,3]-np.reshape([0.5],(1,1,1,1)))/0.5
 	    data.append(vox)
 
         return np.array(data)
