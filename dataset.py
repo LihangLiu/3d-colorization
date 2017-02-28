@@ -1,7 +1,6 @@
 import numpy as np
 import collections
 import glob
-import util
 import config
 
 Datasets = collections.namedtuple('Datasets', ['train'])

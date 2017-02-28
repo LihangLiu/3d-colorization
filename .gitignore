@@ -1,6 +1,5 @@
-log/*
-out/*
-params/*
+outputs/*
+data/*
 *.pyc
 */*.pyc
 

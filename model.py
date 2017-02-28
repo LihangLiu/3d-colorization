@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import util
+
 
 def weight_variable(shape):
     return tf.Variable(tf.random_normal(shape, stddev=0.02))

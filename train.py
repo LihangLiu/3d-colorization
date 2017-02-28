@@ -1,9 +1,9 @@
 import tensorflow as tf
 import numpy as np
 import model
-import util
 import dataset
 import time
+
 
 data = dataset.read()
 
@@ -46,32 +46,45 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 
 with tf.Session(config=config) as sess:
-    sess.run(tf.initialize_all_variables())
-    total_batch = data.train.num_examples / batch_size
+	sess.run(tf.global_variables_initializer())
+	total_batch = data.train.num_examples / batch_size
 
-    for epoch in xrange(1, 500):
+	# running for 500 epoches
+	for epoch in xrange(1, 500):	
+		# train one epoch
+		loss_list = {'G':[], 'D':[]}
+		for i in xrange(total_batch): 
+			# input
+			voxels = data.train.next_batch(batch_size)
+			batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
 
-        for i in xrange(total_batch):
-            voxels = data.train.next_batch(batch_size)
-            batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
+			# forward-backward
+			sess.run(opt_G, feed_dict={z:batch_z, train:True})
+			if i%5 == 0:
+				sess.run(opt_D, feed_dict={x:voxels, z:batch_z, train:True})
 
-            sess.run(opt_G, feed_dict={z:batch_z, train:True})
-            sess.run(opt_D, feed_dict={x:voxels, z:batch_z, train:True})
+			# evaluate
+			batch_loss_G = sess.run(loss_G, feed_dict={z:batch_z, train:False})
+			batch_loss_D = sess.run(loss_D, feed_dict={x:voxels, z:batch_z, train:False})
+			loss_list['G'].append(batch_loss_G)
+			loss_list['D'].append(batch_loss_D)
 
-            with open("out/loss_4.csv", 'a') as f:
-                batch_loss_G = sess.run(loss_G, feed_dict={z:batch_z, train:False})
-                batch_loss_D = sess.run(loss_D, feed_dict={x:voxels, z:batch_z, train:False})
-                msg = "{0}, {1}, {2:.8f}, {3:.8f}".format(epoch, i, batch_loss_G, batch_loss_D)
-                print >> f, msg
-                print msg
+		# print loss
+		loss_G_mean = np.mean(loss_list['G'])
+		loss_D_mean = np.mean(loss_list['D'])
+		with open("out/loss_4.csv", 'a') as f:
+			msg = "{0}, {1:.8f}, {2:.8f}".format(epoch, loss_G_mean, loss_D_mean)
+			print >> f, msg
+			print msg
 
-        batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
-        voxels = sess.run(x_, feed_dict={z:batch_z})
 
-        for j, v in enumerate(voxels[:5]):
-            v = v.reshape([32, 32, 32, 4])
-	    np.save("out/epoch5_{0}-{1}.npy".format(epoch, j), v)
-            #util.save_binvox(v, "out/epoch3_{0}-{1}.binvox".format(epoch, j))
+		# sample outputs
+		batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
+		voxels = sess.run(x_, feed_dict={z:batch_z})
 
-        if epoch % save_interval == 0:
-            saver.save(sess, "params/epoch5_{0}.ckpt".format(epoch))
+		for j, v in enumerate(voxels[:5]):
+			v = v.reshape([32, 32, 32, 4])
+		np.save("outputs/voxels/epoch6_{0}-{1}.npy".format(epoch, j), v)
+
+		if epoch % save_interval == 0:
+			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
