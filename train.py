@@ -10,7 +10,7 @@ data = dataset.read()
 batch_size = 32
 learning_rate = 0.0001
 beta1 = 0.5
-z_size = 1000
+z_size = 50
 save_interval = 1
 
 x = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 4])
@@ -72,7 +72,7 @@ with tf.Session(config=config) as sess:
 		# print loss
 		loss_G_mean = np.mean(loss_list['G'])
 		loss_D_mean = np.mean(loss_list['D'])
-		with open("out/loss_4.csv", 'a') as f:
+		with open("outputs/voxels/loss_7.csv", 'a') as f:
 			msg = "{0}, {1:.8f}, {2:.8f}".format(epoch, loss_G_mean, loss_D_mean)
 			print >> f, msg
 			print msg
@@ -84,7 +84,7 @@ with tf.Session(config=config) as sess:
 
 		for j, v in enumerate(voxels[:5]):
 			v = v.reshape([32, 32, 32, 4])
-		np.save("outputs/voxels/epoch6_{0}-{1}.npy".format(epoch, j), v)
+			np.save("outputs/voxels/epoch7_{0}-{1}.npy".format(epoch, j), v)
 
-		if epoch % save_interval == 0:
-			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
+#		if epoch % save_interval == 0:
+#			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
