@@ -13,7 +13,7 @@ Getenv=True
 Log=outputs/log/foo3.log
 Output=outputs/log/out3.log
 Error=outputs/log/err3.log
-Executable=/u/leonliu/repos/3d-colorization/condor_executable.sh
+Executable=/u/leonliu/repos/3d-colorization/run.sh
 
 
 Queue 1

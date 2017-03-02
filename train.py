@@ -88,3 +88,4 @@ with tf.Session(config=config) as sess:
 
 #		if epoch % save_interval == 0:
 #			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
+
