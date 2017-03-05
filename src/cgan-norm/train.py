@@ -14,14 +14,13 @@ z_size = 50
 save_interval = 1
 
 x = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 4])
-a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
 z = tf.placeholder(tf.float32, [batch_size, z_size])
 train = tf.placeholder(tf.bool)
 
 G = model.Generator(z_size)
 D = model.Discriminator()
 
-x_ = G(z, a, train)
+x_ = G(z)
 y_ = D(x_, train)
 
 y = D(x, train)
@@ -37,13 +36,6 @@ loss_D += tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, label
 
 var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 var_D = [v for v in tf.trainable_variables() if 'd_' in v.name]
-
-print 'var_G '
-for v in var_G:
-	print v
-print 'var_D '
-for v in var_D:
-	print v
 
 opt_G = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_G, var_list=var_G)
 opt_D = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_D, var_list=var_D)
@@ -63,25 +55,24 @@ with tf.Session(config=config) as sess:
 		loss_list = {'G':[], 'D':[]}
 		for i in xrange(total_batch): 
 			# input
-			voxels = data.train.next_batch(batch_size)		# (batch, 32, 32, 32, 4)
-			voxels_a = voxels[:,:,:,:,3:4]
+			voxels = data.train.next_batch(batch_size)
 			batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
 
 			# forward-backward
-			sess.run(opt_G, feed_dict={z:batch_z, a:voxels_a, train:True})
+			sess.run(opt_G, feed_dict={z:batch_z, train:True})
 			if i%5 == 0:
-				sess.run(opt_D, feed_dict={x:voxels, z:batch_z, a:voxels_a, train:True})
+				sess.run(opt_D, feed_dict={x:voxels, z:batch_z, train:True})
 
 			# evaluate
-			batch_loss_G = sess.run(loss_G, feed_dict={z:batch_z, a:voxels_a, train:False})
-			batch_loss_D = sess.run(loss_D, feed_dict={x:voxels, z:batch_z, a:voxels_a, train:False})
+			batch_loss_G = sess.run(loss_G, feed_dict={z:batch_z, train:False})
+			batch_loss_D = sess.run(loss_D, feed_dict={x:voxels, z:batch_z, train:False})
 			loss_list['G'].append(batch_loss_G)
 			loss_list['D'].append(batch_loss_D)
 
 		# print loss
 		loss_G_mean = np.mean(loss_list['G'])
 		loss_D_mean = np.mean(loss_list['D'])
-		with open("../../outputs/voxels/loss_8.csv", 'a') as f:
+		with open("../../outputs/voxels/loss_9.csv", 'a') as f:
 			msg = "{0}, {1:.8f}, {2:.8f}".format(epoch, loss_G_mean, loss_D_mean)
 			print >> f, msg
 			print msg
@@ -89,13 +80,12 @@ with tf.Session(config=config) as sess:
 
 		# sample outputs
 		batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
-		voxels = sess.run(x_, feed_dict={z:batch_z, a:voxels_a, train:False})
+		voxels = sess.run(x_, feed_dict={z:batch_z})
 
-		for j, v in enumerate(voxels[:5]):
+		for j, v in enumerate(voxels[:2]):
 			v = v.reshape([32, 32, 32, 4])
-			np.save("../../outputs/voxels/epoch8_{0}-{1}.npy".format(epoch, j), v)
+			np.save("../../outputs/voxels/epoch9_{0}-{1}.npy".format(epoch, j), v)
 
 #		if epoch % save_interval == 0:
 #			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
-
 
