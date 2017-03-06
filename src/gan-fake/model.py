@@ -219,3 +219,4 @@ class Discriminator(object):
 		y = tf.matmul(h, self.W['h5']) + self.b['h5']
 		return y
 
+

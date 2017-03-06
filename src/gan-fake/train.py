@@ -4,6 +4,8 @@ import model
 import dataset
 import time
 
+import config as myconfig
+
 
 data = dataset.read()
 
@@ -37,6 +39,17 @@ loss_D += tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, label
 var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 var_D = [v for v in tf.trainable_variables() if 'd_' in v.name]
 
+print 'var_G'
+for v in var_G:
+	print v
+print 'var_D'
+for v in var_D:
+	print v
+
+print 'loss_csv:', myconfig.loss_csv
+print 'vox_prefix:', myconfig.vox_prefix
+
+
 opt_G = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_G, var_list=var_G)
 opt_D = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_D, var_list=var_D)
 
@@ -50,12 +63,13 @@ with tf.Session(config=config) as sess:
 	total_batch = data.train.num_examples / batch_size
 
 	# running for 500 epoches
-	for epoch in xrange(1, 500):	
+	for epoch in xrange(1, 200):	
 		# train one epoch
 		loss_list = {'G':[], 'D':[]}
 		for i in xrange(total_batch): 
 			# input
-			voxels = data.train.next_batch(batch_size)
+			data_dict = data.train.next_batch(batch_size)
+			voxels = data_dict['rgba']
 			batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
 
 			# forward-backward
@@ -72,7 +86,7 @@ with tf.Session(config=config) as sess:
 		# print loss
 		loss_G_mean = np.mean(loss_list['G'])
 		loss_D_mean = np.mean(loss_list['D'])
-		with open("outputs/voxels/loss_7.csv", 'a') as f:
+		with open(myconfig.loss_csv, 'a') as f:
 			msg = "{0}, {1:.8f}, {2:.8f}".format(epoch, loss_G_mean, loss_D_mean)
 			print >> f, msg
 			print msg
@@ -84,8 +98,11 @@ with tf.Session(config=config) as sess:
 
 		for j, v in enumerate(voxels[:5]):
 			v = v.reshape([32, 32, 32, 4])
-			np.save("outputs/voxels/epoch7_{0}-{1}.npy".format(epoch, j), v)
+			v = dataset.transformBack(v)
+			np.save(myconfig.vox_prefix+"{0}-{1}.npy".format(epoch, j), v)
 
-#		if epoch % save_interval == 0:
-#			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
+
+
+
+
 
