@@ -82,7 +82,7 @@ with tf.Session(config=config) as sess:
 		batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
 		voxels = sess.run(x_, feed_dict={z:batch_z})
 
-		for j, v in enumerate(voxels[:5]):
+		for j, v in enumerate(voxels[:2]):
 			v = v.reshape([32, 32, 32, 4])
 			np.save("outputs/voxels/epoch7_{0}-{1}.npy".format(epoch, j), v)
 

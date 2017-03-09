@@ -64,7 +64,7 @@ with tf.Session(config=config) as sess:
 
 	# running for 500 epoches
 	for epoch in xrange(1, 200):	
-		# train one epoch
+		## train one epoch
 		loss_list = {'G':[], 'D':[]}
 		for i in xrange(total_batch): 
 			# input
@@ -83,7 +83,7 @@ with tf.Session(config=config) as sess:
 			loss_list['G'].append(batch_loss_G)
 			loss_list['D'].append(batch_loss_D)
 
-		# print loss
+		## print loss
 		loss_G_mean = np.mean(loss_list['G'])
 		loss_D_mean = np.mean(loss_list['D'])
 		with open(myconfig.loss_csv, 'a') as f:
@@ -92,11 +92,15 @@ with tf.Session(config=config) as sess:
 			print msg
 
 
-		# sample outputs
+		## output voxels
 		batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
-		voxels = sess.run(x_, feed_dict={z:batch_z})
+		voxels_ = sess.run(x_, feed_dict={z:batch_z})
 
-		for j, v in enumerate(voxels[:5]):
+		# 1st ground truth
+		np.save(myconfig.vox_prefix+"{0}-sample.npy".format(epoch), 
+				dataset.transformBack(voxels[0]))
+		# generated 
+		for j, v in enumerate(voxels_[:2]):
 			v = v.reshape([32, 32, 32, 4])
 			v = dataset.transformBack(v)
 			np.save(myconfig.vox_prefix+"{0}-{1}.npy".format(epoch, j), v)

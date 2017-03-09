@@ -66,9 +66,9 @@ def transformTo(vox):
 	return data
 
 def randomColor(vox_c, vox_a):
-	c = random.uniform(-1, 1)
 	vox_c = vox_c*vox_a
-	mask = np.nonzero(vox_c)
+	c = random.uniform(-1, 1)
+	mask = np.nonzero(vox_a)
 	vox_c[mask] = c
 	return vox_c
 
@@ -81,7 +81,7 @@ def transformBack(vox):
 
 def scale(vox_c, vox_a):
 	vox_c = vox_c*vox_a
-	mask = np.nonzero(vox_c)
+	mask = np.nonzero(vox_a)
 	vox_c[mask] = vox_c[mask]*0.5+0.5
 	return vox_c
 
