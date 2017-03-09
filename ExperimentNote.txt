@@ -1,0 +1,5 @@
+epoch 11:
+	pure color cube
+
+epoch 12:
+	11 + random noise in x

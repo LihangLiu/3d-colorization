@@ -202,7 +202,7 @@ class Discriminator(object):
 
 	def __call__(self, x, train):
 		shape = x.get_shape().as_list()		
-		#noisy_x = x + tf.random_normal([shape[0], 32, 32, 32, 1])
+		noisy_x = x + tf.random_normal(shape)
 		noisy_x = x
 		h = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])
 		h = lrelu(self.bn2(conv3d(h, self.W['h2']), train))

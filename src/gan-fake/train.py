@@ -63,7 +63,7 @@ with tf.Session(config=config) as sess:
 	total_batch = data.train.num_examples / batch_size
 
 	# running for 500 epoches
-	for epoch in xrange(1, 200):	
+	for epoch in xrange(0, myconfig.ITER_MAX):	
 		## train one epoch
 		loss_list = {'G':[], 'D':[]}
 		for i in xrange(total_batch): 
