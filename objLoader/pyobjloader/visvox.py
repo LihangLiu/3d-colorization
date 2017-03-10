@@ -19,8 +19,8 @@ def pointsToDraw(vox):
 				if(vox[i,j,k,3]!=0):
 					rgb = [vox[i,j,k,0], vox[i,j,k,1], vox[i,j,k,2]]
 					xs.append(i*delta)
-					ys.append(j*delta)
-					zs.append(k*delta)
+					ys.append(1-j*delta)
+					zs.append(1-k*delta)
 					rgbs.append(rgb)
 	return xs,ys,zs,rgbs
 

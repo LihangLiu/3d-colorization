@@ -3,3 +3,14 @@ epoch 11:
 
 epoch 12:
 	11 + random noise in x
+
+epoch 13:
+	gan + noise in x
+
+epoch 14:
+	13 + noise stddev=.1
+
+epoch 15:
+	14 + smooth label=0.75
+
+
