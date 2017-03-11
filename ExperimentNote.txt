@@ -12,5 +12,8 @@ epoch 14:
 
 epoch 15:
 	14 + smooth label=0.75
+	tbd
 
+epoch 16:
+	cgan: vox_a as z	
 

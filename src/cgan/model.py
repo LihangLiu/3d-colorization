@@ -144,80 +144,74 @@ def vbn(x, name):
 	f = VirtualBatchNormalization(x, name)
 	return f(x)
 
+# class Generator(object):
+
+# 	def __init__(self, z_size, name="g_"):
+# 		with tf.variable_scope(name):
+# 			self.name = name
+
+# 			self.W = {
+# 				'h1': weight_variable([z_size, 2*2*2*128]),
+# 				'h2': weight_variable([4, 4, 4, 64, 128]),
+# 				'h3': weight_variable([4, 4, 4, 32, 64]),
+# 				'h4': weight_variable([4, 4, 4, 16, 32]),
+# 				'h5': weight_variable([4, 4, 4, 4, 16])
+# 			}
+
+# 			self.b = {
+# 				'h5': bias_variable([1])
+# 			}
+
+# 	def __call__(self, z):
+# 		shape = z.get_shape().as_list()
+
+# 		h = tf.nn.relu(vbn(tf.matmul(z, self.W['h1']), 'g_vbn_1'))
+# 		h = tf.reshape(h, [-1, 2, 2, 2, 128])
+# 		h = tf.nn.relu(vbn(deconv3d(h, self.W['h2'], [shape[0], 4, 4, 4, 64]), 'g_vbn_2'))
+# 		h = tf.nn.relu(vbn(deconv3d(h, self.W['h3'], [shape[0], 8, 8, 8, 32]), 'g_vbn_3'))
+# 		h = tf.nn.relu(vbn(deconv3d(h, self.W['h4'], [shape[0], 16, 16, 16, 16]), 'g_vbn_4'))
+# 		x = tf.nn.tanh(deconv3d(h, self.W['h5'], [shape[0], 32, 32, 32, 4]) + self.b['h5'])
+# 		return x
+
 class Generator(object):
 
-	def __init__(self, z_size, name="g_"):
+	def __init__(self, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
-			# weights for decoder
-			self.d_W = {
-				'h1': weight_variable([z_size+2*2*2*128, 2*2*2*128]),   #!!!tbd
-				'h2': weight_variable([4, 4, 4, 64, 128]),
-				'h3': weight_variable([4, 4, 4, 32, 64]),
-				'h4': weight_variable([4, 4, 4, 16, 32]),
-				'h5': weight_variable([4, 4, 4, 3, 16])
+
+			self.W = {
+				'h1': weight_variable([4, 4, 4, 1, 4]),
+				'h2': weight_variable([4, 4, 4, 4, 16]),
+				'h3': weight_variable([4, 4, 4, 16, 64]),
+				'h4': weight_variable([4, 4, 4, 64, 64]),
+
+				'dh1': weight_variable([4, 4, 4, 32, 64]),
+				'dh2': weight_variable([4, 4, 4, 16, 32]),
+				'dh3': weight_variable([4, 4, 4, 4, 16])
 			}
 
-			self.d_b = {
-				'h5': bias_variable([1])
-			}
-			# weights for encoder
-			self.e_W = {
-				'h1': weight_variable([4, 4, 4, 1, 16]),
-				'h2': weight_variable([4, 4, 4, 16, 32]),
-				'h3': weight_variable([4, 4, 4, 32, 64]),
-				'h4': weight_variable([4, 4, 4, 64, 128])
+			self.b = {
+				'h1': bias_variable([4]),
+				'dh3': bias_variable([4]),
 			}
 
-			self.e_b = {
-				'h1': bias_variable([16])
-			}
+			self.bn2 = BatchNormalization([16], 'bn2')
+			self.bn3 = BatchNormalization([64], 'bn3')
+			self.bn4 = BatchNormalization([64], 'bn4')
 
-			self.e_bn2 = BatchNormalization([32], 'bn2')
-			self.e_bn3 = BatchNormalization([64], 'bn3')
-			self.e_bn4 = BatchNormalization([128], 'bn4')
+	def __call__(self, x, train):
+		shape = x.get_shape().as_list()		# (n,32,32,32,1)
 
+		h = lrelu(conv3d(x,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,4)
+		h = lrelu(self.bn2(conv3d(h,self.W['h2'],stride=2), train)) # (n,8,8,8,16)
+		h = lrelu(self.bn3(conv3d(h,self.W['h3'],stride=2), train)) # (n,4,4,4,64)
+		h = lrelu(self.bn4(conv3d(h,self.W['h4'],stride=1), train)) # (n,4,4,4,64)
 
-	def __call__(self, z, vox_a, train):
-		# get encoder. a: (batch, 2*2*2*128), 
-		a = self.encoder(vox_a, train)
-		# concate a and z
-		z = tf.concat([a, z],1)
-		# decoder
-		vox_rgb = self.decoder(z)
-		# apply mask
-		vox_rgba = self.mask(vox_a, vox_rgb)
-		return vox_rgba
+		h = tf.nn.relu(vbn(deconv3d(h, self.W['dh1'], [shape[0],  8, 8, 8,32]), 'g_vbn_1')) #(n,8,8,8,32)
+		h = tf.nn.relu(vbn(deconv3d(h, self.W['dh2'], [shape[0], 16,16,16,16]), 'g_vbn_2')) #(n,16,16,16,16)
+		x = tf.nn.tanh(deconv3d(h, self.W['dh3'], [shape[0], 32,32,32,4]) + self.b['dh3']) 	#(n,32,32,32,4)
 
-	def encoder(self, vox_a, train):
-		# vox_a : (batch, 32, 32, 32, 1), \in {0,1}
-		a = lrelu(conv3d(vox_a, self.e_W['h1']) + self.e_b['h1'])
-		a = lrelu(self.e_bn2(conv3d(a, self.e_W['h2']), train))
-		a = lrelu(self.e_bn3(conv3d(a, self.e_W['h3']), train))
-		a = lrelu(self.e_bn4(conv3d(a, self.e_W['h4']), train))
-		a = tf.reshape(a, [-1, 2*2*2*128])
-		return a
-
-	def decoder(self, z):
-		# vox_rgb : (batch, 32, 32, 32, 3),		
-		shape = z.get_shape().as_list()
-		#self.d_W['h1'] = weight_variable([shape[1], 2*2*2*128])
-
-		h = tf.nn.relu(vbn(tf.matmul(z, self.d_W['h1']), 'g_vbn_1'))
-		h = tf.reshape(h, [-1, 2, 2, 2, 128])
-		h = tf.nn.relu(vbn(deconv3d(h, self.d_W['h2'], [shape[0], 4, 4, 4, 64]), 'g_vbn_2'))
-		h = tf.nn.relu(vbn(deconv3d(h, self.d_W['h3'], [shape[0], 8, 8, 8, 32]), 'g_vbn_3'))
-		h = tf.nn.relu(vbn(deconv3d(h, self.d_W['h4'], [shape[0], 16, 16, 16, 16]), 'g_vbn_4'))
-		vox_rgb = tf.nn.tanh(deconv3d(h, self.d_W['h5'], [shape[0], 32, 32, 32, 3]) + self.d_b['h5'])
-		return vox_rgb
-
-	def mask(self, vox_a, vox_rgb):
-		# vox_rgba : (batch, 32, 32, 32, 4),		
-		vox_as = tf.concat([vox_a, vox_a, vox_a], 4)
-		vox_rgb = tf.multiply(vox_rgb,vox_as)
-		vox_rgba = tf.concat([vox_rgb, vox_a], 4)
-		return vox_rgba
-
+		return x
 
 class Discriminator(object):
 
@@ -248,7 +242,7 @@ class Discriminator(object):
 
 	def __call__(self, x, train):
 		shape = x.get_shape().as_list()		
-		#noisy_x = x + tf.random_normal([shape[0], 32, 32, 32, 1])
+		noisy_x = x + tf.random_normal(shape,mean=0.0,stddev=.1)
 		noisy_x = x
 		h = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])
 		h = lrelu(self.bn2(conv3d(h, self.W['h2']), train))

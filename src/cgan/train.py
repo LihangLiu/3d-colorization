@@ -4,30 +4,32 @@ import model
 import dataset
 import time
 
+import config as myconfig
+
 
 data = dataset.read()
 
 batch_size = 32
 learning_rate = 0.0001
 beta1 = 0.5
-z_size = 50
+# z_size = 50
 save_interval = 1
 
 x = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 4])
-a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
-z = tf.placeholder(tf.float32, [batch_size, z_size])
+z = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
 train = tf.placeholder(tf.bool)
 
-G = model.Generator(z_size)
+G = model.Generator()
 D = model.Discriminator()
 
-x_ = G(z, a, train)
+x_ = G(z, train)
 y_ = D(x_, train)
 
 y = D(x, train)
 
 label_real = np.zeros([batch_size, 2], dtype=np.float32)
 label_fake = np.zeros([batch_size, 2], dtype=np.float32)
+
 label_real[:, 0] = 1
 label_fake[:, 1] = 1
 
@@ -38,12 +40,16 @@ loss_D += tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, label
 var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 var_D = [v for v in tf.trainable_variables() if 'd_' in v.name]
 
-print 'var_G '
+print 'var_G'
 for v in var_G:
 	print v
-print 'var_D '
+print 'var_D'
 for v in var_D:
 	print v
+
+print 'loss_csv:', myconfig.loss_csv
+print 'vox_prefix:', myconfig.vox_prefix
+
 
 opt_G = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_G, var_list=var_G)
 opt_D = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_D, var_list=var_D)
@@ -58,44 +64,51 @@ with tf.Session(config=config) as sess:
 	total_batch = data.train.num_examples / batch_size
 
 	# running for 500 epoches
-	for epoch in xrange(1, 500):	
-		# train one epoch
+	for epoch in xrange(0, myconfig.ITER_MAX):	
+		## train one epoch
 		loss_list = {'G':[], 'D':[]}
 		for i in xrange(total_batch): 
 			# input
-			voxels = data.train.next_batch(batch_size)		# (batch, 32, 32, 32, 4)
-			voxels_a = voxels[:,:,:,:,3:4]
-			batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
+			data_dict = data.train.next_batch(batch_size)
+			voxels = data_dict['rgba']		# (n,32,32,32,4)
+			# batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
+			batch_z = voxels[:,:,:,:,3:4]		# (n,32,32,32,1)
 
 			# forward-backward
-			sess.run(opt_G, feed_dict={z:batch_z, a:voxels_a, train:True})
+			sess.run(opt_G, feed_dict={z:batch_z, train:True})
 			if i%5 == 0:
-				sess.run(opt_D, feed_dict={x:voxels, z:batch_z, a:voxels_a, train:True})
+				sess.run(opt_D, feed_dict={x:voxels, z:batch_z, train:True})
 
 			# evaluate
-			batch_loss_G = sess.run(loss_G, feed_dict={z:batch_z, a:voxels_a, train:False})
-			batch_loss_D = sess.run(loss_D, feed_dict={x:voxels, z:batch_z, a:voxels_a, train:False})
+			batch_loss_G = sess.run(loss_G, feed_dict={z:batch_z, train:False})
+			batch_loss_D = sess.run(loss_D, feed_dict={x:voxels, z:batch_z, train:False})
 			loss_list['G'].append(batch_loss_G)
 			loss_list['D'].append(batch_loss_D)
 
-		# print loss
+		## print loss
 		loss_G_mean = np.mean(loss_list['G'])
 		loss_D_mean = np.mean(loss_list['D'])
-		with open("../../outputs/voxels/loss_8.csv", 'a') as f:
+		with open(myconfig.loss_csv, 'a') as f:
 			msg = "{0}, {1:.8f}, {2:.8f}".format(epoch, loss_G_mean, loss_D_mean)
 			print >> f, msg
 			print msg
 
 
-		# sample outputs
-		batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
-		voxels = sess.run(x_, feed_dict={z:batch_z, a:voxels_a, train:False})
+		## output voxels by generator
+		# batch_z = np.random.uniform(-1, 1, [batch_size, z_size]).astype(np.float32)
+		voxels_ = sess.run(x_, feed_dict={z:batch_z, train:False})
 
-		for j, v in enumerate(voxels[:5]):
+		# 1st ground truth
+		np.save(myconfig.vox_prefix+"{0}-sample.npy".format(epoch), 
+				dataset.transformBack(voxels[0]))
+		# generated 
+		for j, v in enumerate(voxels_[:2]):
 			v = v.reshape([32, 32, 32, 4])
-			np.save("../../outputs/voxels/epoch8_{0}-{1}.npy".format(epoch, j), v)
+			v = dataset.transformBack(v)
+			np.save(myconfig.vox_prefix+"{0}-{1}.npy".format(epoch, j), v)
 
-#		if epoch % save_interval == 0:
-#			saver.save(sess, "outputs/params/epoch6_{0}.ckpt".format(epoch))
+
+
+
 
 
