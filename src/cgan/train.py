@@ -13,7 +13,7 @@ batch_size = 32
 learning_rate = 0.0001
 beta1 = 0.5
 z_size = 5
-save_interval = 1
+save_interval = 10
 
 ###  input variables
 z = tf.placeholder(tf.float32, [batch_size, z_size])
@@ -107,7 +107,9 @@ with tf.Session(config=config) as sess:
 			print >> f, msg
 			print msg
 
-		### output voxels by G ### 
+		### output voxels by G ###
+		if epoch%10 != 0:
+			continue 
 		# 1st ground truth
 		np.save(myconfig.vox_prefix+"{0}-sample.npy".format(epoch), 
 				dataset.transformBack(batch_dict['rgba'][0]))
