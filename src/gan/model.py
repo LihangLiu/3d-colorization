@@ -162,7 +162,8 @@ class Generator(object):
 				'h5': bias_variable([1])
 			}
 
-	def __call__(self, z):
+	def __call__(self, z, train):
+		# train is not used
 		shape = z.get_shape().as_list()
 
 		h = tf.nn.relu(vbn(tf.matmul(z, self.W['h1']), 'g_vbn_1'))
