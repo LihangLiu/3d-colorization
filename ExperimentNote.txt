@@ -15,5 +15,10 @@ epoch 15:
 	tbd
 
 epoch 16:
-	cgan: vox_a as z	
+	cgan: new G by conv+deconv
+	      input  vox_a	
+
+epoch 17:
+	16 + noise z
+
 

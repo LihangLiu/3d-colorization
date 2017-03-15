@@ -144,43 +144,17 @@ def vbn(x, name):
 	f = VirtualBatchNormalization(x, name)
 	return f(x)
 
-# class Generator(object):
-
-# 	def __init__(self, z_size, name="g_"):
-# 		with tf.variable_scope(name):
-# 			self.name = name
-
-# 			self.W = {
-# 				'h1': weight_variable([z_size, 2*2*2*128]),
-# 				'h2': weight_variable([4, 4, 4, 64, 128]),
-# 				'h3': weight_variable([4, 4, 4, 32, 64]),
-# 				'h4': weight_variable([4, 4, 4, 16, 32]),
-# 				'h5': weight_variable([4, 4, 4, 4, 16])
-# 			}
-
-# 			self.b = {
-# 				'h5': bias_variable([1])
-# 			}
-
-# 	def __call__(self, z):
-# 		shape = z.get_shape().as_list()
-
-# 		h = tf.nn.relu(vbn(tf.matmul(z, self.W['h1']), 'g_vbn_1'))
-# 		h = tf.reshape(h, [-1, 2, 2, 2, 128])
-# 		h = tf.nn.relu(vbn(deconv3d(h, self.W['h2'], [shape[0], 4, 4, 4, 64]), 'g_vbn_2'))
-# 		h = tf.nn.relu(vbn(deconv3d(h, self.W['h3'], [shape[0], 8, 8, 8, 32]), 'g_vbn_3'))
-# 		h = tf.nn.relu(vbn(deconv3d(h, self.W['h4'], [shape[0], 16, 16, 16, 16]), 'g_vbn_4'))
-# 		x = tf.nn.tanh(deconv3d(h, self.W['h5'], [shape[0], 32, 32, 32, 4]) + self.b['h5'])
-# 		return x
 
 class Generator(object):
 
-	def __init__(self, name="g_"):
+	def __init__(self, z_size=5, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
 
 			self.W = {
-				'h1': weight_variable([4, 4, 4, 1, 4]),
+				'hz': weight_variable([z_size, 32*32*32*1]),
+
+				'h1': weight_variable([4, 4, 4, 2, 4]),
 				'h2': weight_variable([4, 4, 4, 4, 16]),
 				'h3': weight_variable([4, 4, 4, 16, 64]),
 				'h4': weight_variable([4, 4, 4, 64, 64]),
@@ -199,14 +173,21 @@ class Generator(object):
 			self.bn3 = BatchNormalization([64], 'bn3')
 			self.bn4 = BatchNormalization([64], 'bn4')
 
-	def __call__(self, x, train):
+	def __call__(self, x, z, train):
 		shape = x.get_shape().as_list()		# (n,32,32,32,1)
 
+		# add noise
+		z = tf.matmul(z, self.W['hz'])		# z:(n,32*32*32)
+		z = tf.reshape(z, [-1,32,32,32,1]) 	# z:(n,32,32,32,1)
+		x = tf.concat([x,z], -1)			# (n,32,32,32,2)
+
+		# conv
 		h = lrelu(conv3d(x,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,4)
 		h = lrelu(self.bn2(conv3d(h,self.W['h2'],stride=2), train)) # (n,8,8,8,16)
 		h = lrelu(self.bn3(conv3d(h,self.W['h3'],stride=2), train)) # (n,4,4,4,64)
 		h = lrelu(self.bn4(conv3d(h,self.W['h4'],stride=1), train)) # (n,4,4,4,64)
 
+		# deconv
 		h = tf.nn.relu(vbn(deconv3d(h, self.W['dh1'], [shape[0],  8, 8, 8,32]), 'g_vbn_1')) #(n,8,8,8,32)
 		h = tf.nn.relu(vbn(deconv3d(h, self.W['dh2'], [shape[0], 16,16,16,16]), 'g_vbn_2')) #(n,16,16,16,16)
 		x = tf.nn.tanh(deconv3d(h, self.W['dh3'], [shape[0], 32,32,32,4]) + self.b['dh3']) 	#(n,32,32,32,4)
@@ -258,5 +239,6 @@ class Discriminator(object):
 		h = tf.concat([h, f],1)
 		y = tf.matmul(h, self.W['h5']) + self.b['h5']
 		return y
+
 
 
