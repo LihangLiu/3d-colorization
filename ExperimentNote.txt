@@ -21,4 +21,13 @@ epoch 16:
 epoch 17:
 	16 + noise z
 
+epoch 18:
+	cgan: G by decoder+encoder
+	      input vox_a,z
 
+-- fatal bug found on noise_x --
+epoch 19:
+	14 + bug fixed
+
+epoch 20:
+	17 + bug fixed

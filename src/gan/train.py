@@ -103,6 +103,8 @@ with tf.Session(config=config) as sess:
 			print msg
 
 		### output voxels by G ### 
+		if epoch%10 != 0:
+			continue
 		# 1st ground truth
 		np.save(myconfig.vox_prefix+"{0}-sample.npy".format(epoch), 
 				dataset.transformBack(batch_dict['rgba'][0]))
