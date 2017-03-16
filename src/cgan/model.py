@@ -154,7 +154,7 @@ class Generator(object):
 			self.W = {
 				'hz': weight_variable([z_size, 32*32*32*1]),
 
-				'h1': weight_variable([4, 4, 4, 1, 4]),
+				'h1': weight_variable([4, 4, 4, 2, 4]),
 				'h2': weight_variable([4, 4, 4, 4, 16]),
 				'h3': weight_variable([4, 4, 4, 16, 64]),
 				'h4': weight_variable([4, 4, 4, 64, 64]),
@@ -177,9 +177,9 @@ class Generator(object):
 		shape = x.get_shape().as_list()		# (n,32,32,32,1)
 
 		# add noise
-		#z = tf.matmul(z, self.W['hz'])		# z:(n,32*32*32)
-		#z = tf.reshape(z, [-1,32,32,32,1]) 	# z:(n,32,32,32,1)
-		#x = tf.concat([x,z], -1)			# (n,32,32,32,2)
+		z = tf.matmul(z, self.W['hz'])		# z:(n,32*32*32)
+		z = tf.reshape(z, [-1,32,32,32,1]) 	# z:(n,32,32,32,1)
+		x = tf.concat([x,z], -1)			# (n,32,32,32,2)
 
 		# conv
 		h = lrelu(conv3d(x,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,4)
