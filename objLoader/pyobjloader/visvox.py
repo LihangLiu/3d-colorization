@@ -48,6 +48,7 @@ xs,ys,zs,rgbs = pointsToDraw(vox)
 start = time.time()
 ax.scatter(xs, ys, zs, color=rgbs, s=5)
 print 'time:', time.time()-start
+plt.savefig('test.png')
 plt.show()
 exit(0)
 
