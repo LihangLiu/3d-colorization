@@ -28,12 +28,24 @@ epoch 18:
 -- fatal bug found on noise_x --
 -- epoch 13-18 invalid	      --
 epoch 19:
-	14 + bug fixed
+	gan + noise_x(dev=.1)
 
 epoch 20:
-	17 + bug fixed
+	cgan: G by conv+deconv
+              input vox_a,z
 
 epoch 21:
 	cgan: G by conv+deconv
 	      input vox_a
+
+-- change G/D train ratio --
+-- 5 -> 1 --
+epoch 22:
+	19: ratio=1
+
+epoch 23:
+	20: ratio=1
+
+
+
 

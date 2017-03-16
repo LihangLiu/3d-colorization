@@ -12,7 +12,7 @@ data = dataset.read()
 batch_size = 32
 learning_rate = 0.0001
 beta1 = 0.5
-z_size = 5
+z_size = 0
 save_interval = 1
 
 ###  input variables
@@ -79,8 +79,7 @@ with tf.Session(config=config) as sess:
 			# forward-backward
 			sess.run(opt_G, feed_dict={	z:batch_dict['z'], 
 										train:True})
-			if i%5 == 0:
-				sess.run(opt_D, feed_dict={	z:batch_dict['z'], 
+			sess.run(opt_D, feed_dict={	z:batch_dict['z'], 
 											rgba:batch_dict['rgba'], 
 											train:True})
 
@@ -111,7 +110,7 @@ with tf.Session(config=config) as sess:
 		# generated 
 		voxels_ = sess.run(rgba_, feed_dict={z:batch_dict['z'], 
 											train:False})
-		for j, v in enumerate(voxels_[:2]):
+		for j, v in enumerate(voxels_[:4]):
 			v = v.reshape([32, 32, 32, 4])
 			v = dataset.transformBack(v)
 			np.save(myconfig.vox_prefix+"{0}-{1}.npy".format(epoch, j), v)
