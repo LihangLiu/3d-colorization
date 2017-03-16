@@ -26,8 +26,14 @@ epoch 18:
 	      input vox_a,z
 
 -- fatal bug found on noise_x --
+-- epoch 13-18 invalid	      --
 epoch 19:
 	14 + bug fixed
 
 epoch 20:
 	17 + bug fixed
+
+epoch 21:
+	cgan: G by conv+deconv
+	      input vox_a
+

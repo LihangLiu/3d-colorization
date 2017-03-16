@@ -117,7 +117,7 @@ with tf.Session(config=config) as sess:
 		voxels_ = sess.run(rgba_, feed_dict={a:batch_dict['a'], 
 											z:batch_dict['z'], 
 											train:False})
-		for j, v in enumerate(voxels_[:2]):
+		for j, v in enumerate(voxels_[:4]):
 			v = v.reshape([32, 32, 32, 4])
 			v = dataset.transformBack(v)
 			np.save(myconfig.vox_prefix+"{0}-{1}.npy".format(epoch, j), v)
