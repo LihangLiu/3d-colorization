@@ -27,6 +27,7 @@ def pointsToDraw(vox):
 	return xs,ys,zs,rgbs
 
 def vox2image(voxname,imname):
+	start = time.time()
 	# load .npy file
 	vox = np.load(voxname) 	
 
@@ -43,10 +44,9 @@ def vox2image(voxname,imname):
 	xs,ys,zs,rgbs = pointsToDraw(vox)
 
 	# draw
-	start = time.time()
 	ax.scatter(xs, ys, zs, color=rgbs, s=5)
 	plt.savefig(imname)
-	print 'converted ', voxname
+	#print 'converted ', voxname
 	print 'time:', time.time()-start
 	
 
