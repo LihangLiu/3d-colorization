@@ -46,6 +46,10 @@ epoch 22:
 epoch 23:
 	20: ratio=1
 
+epoch 24:
+	23: cgan+unet
 
+epoch 25:
+	23: cgan+aloss
 
 
