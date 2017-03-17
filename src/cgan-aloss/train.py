@@ -82,7 +82,8 @@ with tf.Session(config=config) as sess:
 			sess.run(opt_G, feed_dict={	a:batch_dict['a'], 
 										z:batch_dict['z'], 
 										train:True})
-			sess.run(opt_D, feed_dict={	a:batch_dict['a'], 
+			if i%5 == 0:
+				sess.run(opt_D, feed_dict={	a:batch_dict['a'], 
 											z:batch_dict['z'], 
 											rgba:batch_dict['rgba'], 
 											train:True})

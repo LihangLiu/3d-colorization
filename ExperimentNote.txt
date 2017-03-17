@@ -48,10 +48,15 @@ epoch 23:
 
 epoch 24:
 	23: cgan+unet
+	crash after 1000 iters	
 
 epoch 25:
 	23: cgan+aloss
+	crash after 1700 iters
 
 epoch 26:
 	24: cgan+unet, ratio=5
+
+epoch 27:
+	23: cgan+aloss, ratio=5
 
