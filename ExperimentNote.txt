@@ -52,4 +52,6 @@ epoch 24:
 epoch 25:
 	23: cgan+aloss
 
+epoch 26:
+	24: cgan+unet, ratio=5
 
