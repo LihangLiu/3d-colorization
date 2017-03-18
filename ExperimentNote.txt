@@ -60,3 +60,7 @@ epoch 26:
 epoch 27:
 	23: cgan+aloss, ratio=5
 
+epoch 28:
+	26+27: cgan+unet+aloss, ratio=5
+
+
