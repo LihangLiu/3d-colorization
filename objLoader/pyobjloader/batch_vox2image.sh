@@ -13,11 +13,11 @@ for vox_path in $vox_paths; do
 	echo $vox_path
 	if [ -f "$vox_name.jpg" ];
 	then
-		echo "exist."
+		echo "existing."
 	else
-		echo "converting ..."
 		python $py_dir/vox2image.py $vox_name $vox_name.jpg
 		chmod 755 $vox_name.jpg
+		echo "converted to $vox_name.jpg"
 	fi
 #	python $py_dir/vox2image.py $vox_name $vox_name.jpg
 #	chmod 755 $vox_name.jpg
