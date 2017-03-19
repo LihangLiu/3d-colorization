@@ -13,12 +13,17 @@
 	batch_obj2vox.sh /path/to/objdata/root
 
 # 2. Visualize .npy file
-  rgb \in (0,1). All non-zero alpha is considered to be 1.
+  alpha channel: non-0 as 1. 
+  
+  rgb channels: assume to between (0,1), otherwise clipped to be (0,1).
 
 	python visvox.py path/to/npyfile.npy
 	
 # 3. .npy -> .jpg 
-
+  alpha channel: non-0 as 1. 
+  
+  rgb channels: assume to between (0,1), otherwise clipped to be (0,1).
+  
 ## Usage
 	python vox2image.py path/to/npyfile.npy path/to/savedjpg.jpg
 	
