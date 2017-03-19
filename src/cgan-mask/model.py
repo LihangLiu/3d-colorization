@@ -144,109 +144,36 @@ def vbn(x, name):
 	f = VirtualBatchNormalization(x, name)
 	return f(x)
 
-# class Generator(object):
-
-# 	def __init__(self, z_size=5, name="g_"):
-# 		with tf.variable_scope(name):
-# 			self.name = name
-
-# 			self.W = {
-# 				'hz': weight_variable([z_size, 32*32*32*1]),
-
-# 				'h1': weight_variable([4, 4, 4, 2, 4]),
-# 				'h2': weight_variable([4, 4, 4, 4, 16]),
-# 				'h3': weight_variable([4, 4, 4, 16, 64]),
-# 				'h4': weight_variable([4, 4, 4, 64, 64]),
-
-# 				'dh1': weight_variable([4, 4, 4, 32, 64]),
-# 				'dh2': weight_variable([4, 4, 4, 16, 32]),
-# 				'dh3': weight_variable([4, 4, 4, 3, 16])
-# 			}
-
-# 			self.b = {
-# 				'h1': bias_variable([4]),
-# 				'dh3': bias_variable([3]),
-# 			}
-
-# 			self.bn2 = BatchNormalization([16], 'bn2')
-# 			self.bn3 = BatchNormalization([64], 'bn3')
-# 			self.bn4 = BatchNormalization([64], 'bn4')
-
-# 	def __call__(self, a, z, train):
-# 		shape = a.get_shape().as_list()		# (n,32,32,32,1)
-
-# 		# add noise
-# 		z = tf.matmul(z, self.W['hz'])		# z:(n,32*32*32)
-# 		z = tf.reshape(z, [-1,32,32,32,1]) 	# z:(n,32,32,32,1)
-# 		h = tf.concat([a,z], -1)			# (n,32,32,32,2)
-
-# 		# conv
-# 		h1 = lrelu(conv3d(h,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,4)
-# 		h2 = lrelu(self.bn2(conv3d(h1,self.W['h2'],stride=2), train)) # (n,8,8,8,16)
-# 		h3 = lrelu(self.bn3(conv3d(h2,self.W['h3'],stride=2), train)) # (n,4,4,4,64)
-# 		h4 = lrelu(self.bn4(conv3d(h3,self.W['h4'],stride=1), train)) # (n,4,4,4,64)
-
-# 		# deconv
-# 		dh1 = tf.nn.relu(vbn(deconv3d(h4, self.W['dh1'], [shape[0],  8, 8, 8,32]), 'g_vbn_1')) #(n,8,8,8,32)
-# 		dh2 = tf.nn.relu(vbn(deconv3d(dh1, self.W['dh2'], [shape[0], 16,16,16,16]), 'g_vbn_2')) #(n,16,16,16,16)
-# 		rgb = tf.nn.tanh(deconv3d(dh2, self.W['dh3'], [shape[0], 32,32,32,3]) + self.b['dh3']) 	#(n,32,32,32,3)
-
-# 		# mask
-# 		rgba = self.mask(rgb,a)
-
-# 		return rgba
-
-# 	def mask(self, rgb, a):
-# 		### rgb \in (-1,1), (batch, 32, 32, 32, 3)
-# 		### a \in {-1,1},	(batch, 32, 32, 32, 1)
-# 		# (-1,1) -> (0,1)
-# 		rgb = rgb*0.5 + 0.5
-# 		a = a*0.5 + 0.5
-# 		# mask
-# 		rep_a = tf.concat([a,a,a], 4)
-# 		rgb = tf.multiply(rgb,rep_a)
-# 		rgba = tf.concat([rgb,a], 4)
-# 		# (0,1) -> (-1,1)
-# 		rgba = (rgba-0.5)*2
-
-# 		return rgba
-
 class Generator(object):
 
-	def __init__(self, z_size=5, ngf=8, name="g_"):
+	def __init__(self, z_size=5, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
-			self.ngf = ngf
 
 			self.W = {
 				'hz': weight_variable([z_size, 32*32*32*1]),
 
-				'h1': weight_variable([4, 4, 4, 2, ngf]),
-				'h2': weight_variable([4, 4, 4, ngf, ngf*2]),
-				'h3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
-				'h4': weight_variable([4, 4, 4, ngf*4, ngf*8]),
-				'h5': weight_variable([4, 4, 4, ngf*8, ngf*8]),
+				'h1': weight_variable([4, 4, 4, 2, 4]),
+				'h2': weight_variable([4, 4, 4, 4, 16]),
+				'h3': weight_variable([4, 4, 4, 16, 64]),
+				'h4': weight_variable([4, 4, 4, 64, 64]),
 
-				'dh1': weight_variable([4, 4, 4, ngf*8, ngf*8]),
-				'dh2': weight_variable([4, 4, 4, ngf*4, ngf*8]),
-				'dh3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
-				'dh4': weight_variable([4, 4, 4, ngf, ngf*2]),
-				'dh5': weight_variable([4, 4, 4, 3, ngf])
+				'dh1': weight_variable([4, 4, 4, 16, 64]),
+				'dh2': weight_variable([4, 4, 4, 4, 16]),
+				'dh3': weight_variable([4, 4, 4, 3, 4])
 			}
 
 			self.b = {
-				'h1': bias_variable([ngf]),
-				'dh5': bias_variable([3]),
+				'h1': bias_variable([4]),
+				'dh3': bias_variable([3]),
 			}
 
-			self.bn2 = BatchNormalization([ngf*2], 'bn2')
-			self.bn3 = BatchNormalization([ngf*4], 'bn3')
-			self.bn4 = BatchNormalization([ngf*8], 'bn4')
-			self.bn5 = BatchNormalization([ngf*8], 'bn4')
+			self.bn2 = BatchNormalization([16], 'bn2')
+			self.bn3 = BatchNormalization([64], 'bn3')
+			self.bn4 = BatchNormalization([64], 'bn4')
 
 	def __call__(self, a, z, train):
 		shape = a.get_shape().as_list()		# (n,32,32,32,1)
-		ngf = self.ngf
 
 		# add noise
 		z = tf.matmul(z, self.W['hz'])		# z:(n,32*32*32)
@@ -254,18 +181,15 @@ class Generator(object):
 		h = tf.concat([a,z], -1)			# (n,32,32,32,2)
 
 		# conv
-		h1 = lrelu(conv3d(h,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,f)
-		h2 = lrelu(self.bn2(conv3d(h1,self.W['h2'],stride=2), train)) # (n,8,8,8,f*2)
-		h3 = lrelu(self.bn3(conv3d(h2,self.W['h3'],stride=2), train)) # (n,4,4,4,f*4)
-		h4 = lrelu(self.bn4(conv3d(h3,self.W['h4'],stride=2), train)) # (n,2,2,2,f*8)
-		h5 = lrelu(self.bn5(conv3d(h4,self.W['h5'],stride=2), train)) # (n,1,1,1,f*8)
+		h1 = lrelu(conv3d(h,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,4)
+		h2 = lrelu(self.bn2(conv3d(h1,self.W['h2'],stride=2), train)) # (n,8,8,8,16)
+		h3 = lrelu(self.bn3(conv3d(h2,self.W['h3'],stride=2), train)) # (n,4,4,4,64)
+		h4 = lrelu(self.bn4(conv3d(h3,self.W['h4'],stride=1), train)) # (n,4,4,4,64)
 
 		# deconv
-		dh1 = tf.nn.relu(vbn(deconv3d(h5, self.W['dh1'], [shape[0],  2,2,2,ngf*8]), 'g_vbn_1')) #(n,2,2,2,f*8)
-		dh2 = tf.nn.relu(vbn(deconv3d(dh1, self.W['dh2'], [shape[0], 4,4,4,ngf*4]), 'g_vbn_2')) #(n,4,4,4,f*4)
-		dh3 = tf.nn.relu(vbn(deconv3d(dh2, self.W['dh3'], [shape[0], 8,8,8,ngf*2]), 'g_vbn_3')) #(n,8,8,8,f*2)
-		dh4 = tf.nn.relu(vbn(deconv3d(dh3, self.W['dh4'], [shape[0], 16,16,16,ngf]), 'g_vbn_4')) #(n,16,16,16,f)
-		rgb = tf.nn.tanh(deconv3d(dh4, self.W['dh5'], [shape[0], 32,32,32,3]) + self.b['dh5']) 	#(n,32,32,32,3)
+		dh1 = tf.nn.relu(vbn(deconv3d(h4, self.W['dh1'], [shape[0],  8, 8, 8,16]), 'g_vbn_1')) #(n,8,8,8,16)
+		dh2 = tf.nn.relu(vbn(deconv3d(dh1, self.W['dh2'], [shape[0], 16,16,16,4]), 'g_vbn_2')) #(n,16,16,16,4)
+		rgb = tf.nn.tanh(deconv3d(dh2, self.W['dh3'], [shape[0], 32,32,32,3]) + self.b['dh3']) 	#(n,32,32,32,3)
 
 		# mask
 		rgba = self.mask(rgb,a)
@@ -286,6 +210,82 @@ class Generator(object):
 		rgba = (rgba-0.5)*2
 
 		return rgba
+
+# class Generator(object):
+
+# 	def __init__(self, z_size=5, ngf=8, name="g_"):
+# 		with tf.variable_scope(name):
+# 			self.name = name
+# 			self.ngf = ngf
+
+# 			self.W = {
+# 				'hz': weight_variable([z_size, 32*32*32*1]),
+
+# 				'h1': weight_variable([4, 4, 4, 2, ngf]),
+# 				'h2': weight_variable([4, 4, 4, ngf, ngf*2]),
+# 				'h3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
+# 				'h4': weight_variable([4, 4, 4, ngf*4, ngf*8]),
+# 				'h5': weight_variable([4, 4, 4, ngf*8, ngf*16]),
+
+# 				'dh1': weight_variable([4, 4, 4, ngf*8, ngf*16]),
+# 				'dh2': weight_variable([4, 4, 4, ngf*4, ngf*8]),
+# 				'dh3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
+# 				'dh4': weight_variable([4, 4, 4, ngf, ngf*2]),
+# 				'dh5': weight_variable([4, 4, 4, 3, ngf])
+# 			}
+
+# 			self.b = {
+# 				'h1': bias_variable([ngf]),
+# 				'dh5': bias_variable([3]),
+# 			}
+
+# 			self.bn2 = BatchNormalization([ngf*2], 'bn2')
+# 			self.bn3 = BatchNormalization([ngf*4], 'bn3')
+# 			self.bn4 = BatchNormalization([ngf*8], 'bn4')
+# 			self.bn5 = BatchNormalization([ngf*16], 'bn5')
+
+# 	def __call__(self, a, z, train):
+# 		shape = a.get_shape().as_list()		# (n,32,32,32,1)
+# 		ngf = self.ngf
+
+# 		# add noise
+# 		z = tf.matmul(z, self.W['hz'])		# z:(n,32*32*32)
+# 		z = tf.reshape(z, [-1,32,32,32,1]) 	# z:(n,32,32,32,1)
+# 		h = tf.concat([a,z], -1)			# (n,32,32,32,2)
+
+# 		# conv
+# 		h1 = lrelu(conv3d(h,self.W['h1'],stride=2) + self.b['h1'])	# (n,16,16,16,f)
+# 		h2 = lrelu(self.bn2(conv3d(h1,self.W['h2'],stride=2), train)) # (n,8,8,8,f*2)
+# 		h3 = lrelu(self.bn3(conv3d(h2,self.W['h3'],stride=2), train)) # (n,4,4,4,f*4)
+# 		h4 = lrelu(self.bn4(conv3d(h3,self.W['h4'],stride=2), train)) # (n,2,2,2,f*8)
+# 		h5 = lrelu(self.bn5(conv3d(h4,self.W['h5'],stride=2), train)) # (n,1,1,1,f*16)
+
+# 		# deconv
+# 		dh1 = tf.nn.relu(vbn(deconv3d(h5, self.W['dh1'], [shape[0],  2,2,2,ngf*8]), 'g_vbn_1')) #(n,2,2,2,f*8)
+# 		dh2 = tf.nn.relu(vbn(deconv3d(dh1, self.W['dh2'], [shape[0], 4,4,4,ngf*4]), 'g_vbn_2')) #(n,4,4,4,f*4)
+# 		dh3 = tf.nn.relu(vbn(deconv3d(dh2, self.W['dh3'], [shape[0], 8,8,8,ngf*2]), 'g_vbn_3')) #(n,8,8,8,f*2)
+# 		dh4 = tf.nn.relu(vbn(deconv3d(dh3, self.W['dh4'], [shape[0], 16,16,16,ngf]), 'g_vbn_4')) #(n,16,16,16,f)
+# 		rgb = tf.nn.tanh(deconv3d(dh4, self.W['dh5'], [shape[0], 32,32,32,3]) + self.b['dh5']) 	#(n,32,32,32,3)
+
+# 		# mask
+# 		rgba = self.mask(rgb,a)
+
+# 		return rgba
+
+# 	def mask(self, rgb, a):
+# 		### rgb \in (-1,1), (batch, 32, 32, 32, 3)
+# 		### a \in {-1,1},	(batch, 32, 32, 32, 1)
+# 		# (-1,1) -> (0,1)
+# 		rgb = rgb*0.5 + 0.5
+# 		a = a*0.5 + 0.5
+# 		# mask
+# 		rep_a = tf.concat([a,a,a], 4)
+# 		rgb = tf.multiply(rgb,rep_a)
+# 		rgba = tf.concat([rgb,a], 4)
+# 		# (0,1) -> (-1,1)
+# 		rgba = (rgba-0.5)*2
+
+# 		return rgba
 
 class Discriminator(object):
 

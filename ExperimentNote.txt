@@ -67,6 +67,8 @@ epoch 27:
 epoch 28:
 	26+27: cgan+unet+aloss, ratio=5
 
+-- cgan+mask --
+
 epoch 29:
 	20: cgan+mask
 	a->G->rgb, (a+rgb)->D->
@@ -80,3 +82,12 @@ epoch 31:
 
 epoch 32:
 	31: ngf = 8
+
+epoch 33:
+	32: small adjustment on G
+
+epoch 34:
+	29: symmetrize conv and deconv
+
+
+
