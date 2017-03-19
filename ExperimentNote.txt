@@ -40,6 +40,7 @@ epoch 21:
 
 -- change G/D train ratio --
 -- 5 -> 1 --
+
 epoch 22:
 	19: ratio=1
 
@@ -54,6 +55,9 @@ epoch 25:
 	23: cgan+aloss
 	crash after 1700 iters
 
+-- change G/D train ratio --
+-- 5 -> 1 --
+
 epoch 26:
 	24: cgan+unet, ratio=5
 
@@ -62,5 +66,12 @@ epoch 27:
 
 epoch 28:
 	26+27: cgan+unet+aloss, ratio=5
+
+epoch 29:
+	20: cgan+mask
+	a->G->rgb, (a+rgb)->D->
+
+
+
 
 
