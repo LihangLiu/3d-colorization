@@ -45,6 +45,10 @@ def vox2image(voxname,imname):
 	fig = plt.figure()
 	ax = fig.gca(projection='3d')
 	ax.set_aspect("equal")
+	dim = vox.shape[0]
+	ax.set_xlim(0, dim)
+	ax.set_ylim(0, dim)
+	ax.set_zlim(0, dim)
 	xs,ys,zs,rgbs = pointsToDraw(vox)
 	ax.scatter(xs, ys, zs, color=rgbs, s=5)
 	plt.savefig(imname)

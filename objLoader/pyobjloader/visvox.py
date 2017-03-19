@@ -47,12 +47,14 @@ start = time.time()
 vox = np.load(sys.argv[1]) 
 print vox.shape
 dim = vox.shape[0]
-delta = 1.0/dim
 
 # draw cube
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.set_aspect("equal")
+ax.set_xlim(0, dim)
+ax.set_ylim(0, dim)
+ax.set_zlim(0, dim)
 #r = [0, 1]
 #for s, e in combinations(np.array(list(product(r, r, r))), 2):
 #	if np.sum(np.abs(s-e)) == r[1]-r[0]:
