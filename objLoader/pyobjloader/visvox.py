@@ -7,6 +7,10 @@ from os.path import dirname
 import sys
 import time
 
+# alpha channel: non-0 as 1
+# rgb channels: assume to between (0,1)
+#		otherwise clipped to be (0,1)
+
 def pointsToDraw(vox):
 	dim = vox.shape[0]
 	vox_r = vox[:,:,:,0]
@@ -23,22 +27,9 @@ def pointsToDraw(vox):
 	rgbs[:,0] = vox_r[mask]
 	rgbs[:,1] = vox_g[mask]
 	rgbs[:,2] = vox_b[mask]
+	rgbs = np.clip(rgbs,0,1)
 	rgbs = rgbs.tolist()
 
-	# xs = []
-	# ys = []
-	# zs = []
-	# rgbs = []
-	# dim = vox.shape[0]
-	# for i in range(dim):
-	# 	for j in range(dim):
-	# 		for k in range(dim):
-	# 			if(vox[i,j,k,3]!=0):
-	# 				rgb = [vox[i,j,k,0], vox[i,j,k,1], vox[i,j,k,2]]
-	# 				xs.append(i*delta)
-	# 				ys.append(1-j*delta)
-	# 				zs.append(1-k*delta)
-	# 				rgbs.append(rgb)
 	return xs,ys,zs,rgbs
 
 
