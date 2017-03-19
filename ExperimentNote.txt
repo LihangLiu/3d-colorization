@@ -74,5 +74,7 @@ epoch 29:
 epoch 30:
 	29: cgan+unet+mask
 
+epoch 31:
+	29: cgan+mask, deeperG
 
 
