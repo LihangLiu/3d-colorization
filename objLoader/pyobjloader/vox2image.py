@@ -1,6 +1,7 @@
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
@@ -15,28 +16,16 @@ import time
 # rgb channels: assume to between (0,1)
 #		otherwise clipped to be (0,1)
 
-def pointsToDraw(vox):
-	dim = vox.shape[0]
-	vox_r = vox[:,:,:,0]
-	vox_g = vox[:,:,:,1]
-	vox_b = vox[:,:,:,2]
+def getPoints(vox):
+## xs: (n,1)
+## rbgs: (n,1)
 	vox_a = vox[:,:,:,3]
-
-	mask = np.nonzero(vox_a)
-	xs = mask[0].tolist()
-	ys = (dim-mask[1]).tolist()
-	zs = (dim-mask[2]).tolist()
-
-	rgbs = np.zeros((len(xs),3))
-	rgbs[:,0] = vox_r[mask]
-	rgbs[:,1] = vox_g[mask]
-	rgbs[:,2] = vox_b[mask]
-	rgbs = np.clip(rgbs,0,1)
-	rgbs = rgbs.tolist()
-
+	xs,ys,zs = np.nonzero(vox_a)
+	rgbs = vox[xs,ys,zs,0:3]
 	return xs,ys,zs,rgbs
 
-def vox2image(voxname,imname):
+
+def pltVox(voxname):
 	start = time.time()
 	# load .npy file
 	vox = np.load(voxname) 	
@@ -49,11 +38,11 @@ def vox2image(voxname,imname):
 	ax.set_xlim(0, dim)
 	ax.set_ylim(0, dim)
 	ax.set_zlim(0, dim)
-	xs,ys,zs,rgbs = pointsToDraw(vox)
+	xs,ys,zs,rgbs = getPoints(vox)
 	ax.scatter(xs, ys, zs, color=rgbs, s=5)
-	plt.savefig(imname)
 
 	print 'time:', time.time()-start
+	plt.savefig(imname)
 	
 
 if __name__ == '__main__':
@@ -62,6 +51,21 @@ if __name__ == '__main__':
 
 	# load obj file and convert to vox
 	vox2image(voxname,imname)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

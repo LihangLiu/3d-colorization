@@ -22,6 +22,10 @@ vox2image() {
     fi
 }
 
+#py_dir=`dirname $(pwd)/$0`
+#echo $py_dir
+#exit 1
+
 py_dir=`pwd`
 vox_paths=`find $1 -name '*.npy'`
 IFS=$'\n'
@@ -35,5 +39,6 @@ do
 	done
 	wait
 done
-echo ''
-echo 'DONE'
+
+echo ""
+echo "DONE"
