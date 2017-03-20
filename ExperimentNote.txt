@@ -69,16 +69,18 @@ epoch 28:
 
 -- cgan+mask --
 
-epoch 29:
+epoch 29: ***
 	20: cgan+mask
 	a->G->rgb, (a+rgb)->D->
 
 epoch 30:
 	29: cgan+unet+mask
+	crash
 
 epoch 31:
 	29: cgan+mask, deeperG
 	    ngf = 16
+	crash
 
 epoch 32:
 	31: ngf = 8
