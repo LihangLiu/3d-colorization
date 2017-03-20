@@ -1,3 +1,4 @@
+import _init_paths
 import tensorflow as tf
 import numpy as np
 import model

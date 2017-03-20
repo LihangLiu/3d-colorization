@@ -94,5 +94,12 @@ epoch 34:
 	29: cgan+mask
 	    symmetrize conv and deconv
 
+-- vox dataset jitter	    --
+-- shift, flip, rotate axis --
+
+epoch 35:
+	31: cgan+mask, deeperG
+	    vox jitter
+
 
 
