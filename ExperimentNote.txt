@@ -83,13 +83,16 @@ epoch 31:
 	crash
 
 epoch 32:
-	31: ngf = 8
+	31: cgan+mask, deeperG
+	    ngf = 8
 
 epoch 33:
-	32: h5: (n,1,1,1,f*8->f*16)
+	32: cgan+mask, deeperG
+	    h5: (n,1,1,1,f*8->f*16)
 
 epoch 34:
-	29: symmetrize conv and deconv
+	29: cgan+mask
+	    symmetrize conv and deconv
 
 
 
