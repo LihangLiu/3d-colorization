@@ -98,8 +98,14 @@ epoch 34:
 -- shift, flip, rotate axis --
 
 epoch 35:
-	31: cgan+mask, deeperG
-	    vox jitter
+	32: cgan+mask, deeperG
+	    vox jitter(shift,flip,rotate axis)
+
+epoch 36:
+	35: cgan+mask, deeperG
+            vox jitter(shift)
+	
+
 
 
 
