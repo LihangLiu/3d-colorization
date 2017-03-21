@@ -216,7 +216,7 @@ def vbn(x, name):
 ### 
 class Generator(object):
 
-	def __init__(self, z_size=5, ngf=8, name="g_"):
+	def __init__(self, z_size=5, ngf=5, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ngf = ngf

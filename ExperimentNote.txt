@@ -113,6 +113,8 @@ epoch 37:
 	32: cgan+unet+mask, deeperG
 	    ngf = 8
 
-
+epoch 38:
+        37: cgan+unet+mask, deeperG
+            ngf = 5
 
 
