@@ -25,7 +25,7 @@ def getPoints(vox):
 	return xs,ys,zs,rgbs
 
 
-def pltVox(voxname):
+def vox2image(voxname,imname):
 	start = time.time()
 	# load .npy file
 	vox = np.load(voxname) 	
