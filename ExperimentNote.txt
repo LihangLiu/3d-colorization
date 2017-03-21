@@ -107,6 +107,12 @@ epoch 36:
             vox jitter(shift)
 	crash: loss don't change
 
+-- disable vox jitter --
+
+epoch 37:
+	32: cgan+unet+mask, deeperG
+	    ngf = 8
+
 
 
 

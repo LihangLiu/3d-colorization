@@ -11,7 +11,7 @@ Datasets = collections.namedtuple('Datasets', ['train'])
 class Dataset:
 
 	def __init__(self):
-		self.name = "real, jittered"
+		self.name = "real, not jittered"
 		print "dataset is ", self.name
 
 		self.index_in_epoch = 0
@@ -47,7 +47,7 @@ class Dataset:
 
 		for fname in self.examples[start:end]:
 			vox = np.load(fname)
-			vox = voxJitter(vox)
+			#vox = voxJitter(vox)
 			data = transformTo(vox)
 			batch['rgba'].append(data['rgba'])
 
