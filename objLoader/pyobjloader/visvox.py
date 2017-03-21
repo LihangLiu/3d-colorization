@@ -36,7 +36,7 @@ def pltVox(voxname):
 	ax.set_ylim(0, dim)
 	ax.set_zlim(0, dim)
 	xs,ys,zs,rgbs = getPoints(vox)
-	ax.scatter(xs, ys, zs, color=rgbs, s=5)
+	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs, s=5)
 
 	print 'time:', time.time()-start
 	plt.show()
@@ -44,8 +44,7 @@ def pltVox(voxname):
 
 if __name__ == '__main__':
 	voxname = os.path.abspath(sys.argv[1])
-	for i in range(10):
-		pltVox(voxname)
+	pltVox(voxname)
 
 
 

@@ -39,7 +39,7 @@ def vox2image(voxname,imname):
 	ax.set_ylim(0, dim)
 	ax.set_zlim(0, dim)
 	xs,ys,zs,rgbs = getPoints(vox)
-	ax.scatter(xs, ys, zs, color=rgbs, s=5)
+	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs, s=5)
 
 	print 'time:', time.time()-start
 	plt.savefig(imname)
