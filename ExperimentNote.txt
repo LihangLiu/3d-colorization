@@ -82,7 +82,7 @@ epoch 31:
 	    ngf = 16
 	crash: loss don't change
 
-epoch 32:
+epoch 32: ***
 	31: cgan+mask, deeperG
 	    ngf = 8
 
@@ -116,5 +116,12 @@ epoch 37:
 epoch 38:
         37: cgan+unet+mask, deeperG
             ngf = 5
+
+-- multi-resolution loss --
+
+epoch 39:
+	32: cgan+mask, deeperG
+	    D: rgba->maxpooling->rgba_16->h1
+
 
 
