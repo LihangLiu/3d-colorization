@@ -116,12 +116,13 @@ epoch 37:
 epoch 38:
         37: cgan+unet+mask, deeperG
             ngf = 5
+	no apparent improve using ngf=5
 
 -- multi-resolution loss --
 
-epoch 39:
+epoch 39: ****
 	32: cgan+mask, deeperG
 	    D: rgba->maxpooling->rgba_16->h1
-
+	seems better than epoch 32
 
 
