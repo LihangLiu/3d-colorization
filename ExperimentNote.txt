@@ -147,4 +147,9 @@ epoch 41:
 	40: cwgan+mask, deeperG
 	    noise_x noise stddev=.1
 
+epoch 42:
+        40: cwgan+mask, deeperG
+            remove noise_x
+
+
 
