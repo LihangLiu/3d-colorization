@@ -1,8 +1,12 @@
+-- pure coor cube --
+
 epoch 11:
 	pure color cube
 
 epoch 12:
 	11 + random noise in x
+
+-- noise_x --
 
 epoch 13:
 	gan + noise in x
@@ -27,6 +31,7 @@ epoch 18:
 
 -- fatal bug found on noise_x --
 -- epoch 13-18 invalid	      --
+
 epoch 19:
 	gan + noise_x(dev=.1)
 
@@ -67,7 +72,7 @@ epoch 27:
 epoch 28:
 	26+27: cgan+unet+aloss, ratio=5
 
--- cgan+mask --
+-- add mask --
 
 epoch 29: ***
 	20: cgan+mask
@@ -76,6 +81,8 @@ epoch 29: ***
 epoch 30:
 	29: cgan+unet+mask
 	crash: loss don't change
+
+-- deeper G --
 
 epoch 31:
 	29: cgan+mask, deeperG
@@ -108,6 +115,7 @@ epoch 36:
 	crash: loss don't change
 
 -- disable vox jitter --
+-- unet on deeper G   --
 
 epoch 37:
 	32: cgan+unet+mask, deeperG
@@ -124,5 +132,16 @@ epoch 39: ****
 	32: cgan+mask, deeperG
 	    D: rgba->maxpooling->rgba_16->h1
 	seems better than epoch 32
+
+-- wgan --
+
+epoch 40:
+	32: cwgan+mask, deeperG
+	    a. minibatch discriminator disabled
+	    b. gan loss changed
+	    c. clip on D
+  	    d. more training on D, slower
+	   
+
 
 
