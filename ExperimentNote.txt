@@ -141,7 +141,10 @@ epoch 40:
 	    b. gan loss changed
 	    c. clip on D
   	    d. more training on D, slower
-	   
+	    noise_x noise stddev=1
 
+epoch 41:
+	40: cwgan+mask, deeperG
+	    noise_x noise stddev=.1
 
 
