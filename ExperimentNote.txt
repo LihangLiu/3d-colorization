@@ -133,7 +133,8 @@ epoch 39: ****
 	    D: rgba->maxpooling->rgba_16->h1
 	seems better than epoch 32
 
--- wgan --
+-- wgan    --
+-- noise_x --
 
 epoch 40:
 	32: cwgan+mask, deeperG
@@ -151,5 +152,10 @@ epoch 42:
         40: cwgan+mask, deeperG
             remove noise_x
 
+-- multi-resolution loss --
+
+epoch 43:
+	42: cwgan+mask+mrl, deeperG
+	    D: rgba->maxpooling->rgba_16->h1
 
 
