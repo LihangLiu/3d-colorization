@@ -38,8 +38,8 @@ y_ = D(rgba_, train)
 y = D(rgba, train)
 
 # l1 loss on conv
-loss_G_spa = tf.reduce_mean(G.get_spaconv_loss(scale=0.1))
-loss_D_spa = tf.reduce_mean(D.get_spaconv_loss(scale=0.1))
+loss_G_spa = tf.reduce_mean(G.get_spaconv_loss(scale=10))
+loss_D_spa = tf.reduce_mean(D.get_spaconv_loss(scale=10))
 
 label_real = np.zeros([batch_size, 2], dtype=np.float32)
 label_fake = np.zeros([batch_size, 2], dtype=np.float32)

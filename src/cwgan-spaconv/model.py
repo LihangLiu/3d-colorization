@@ -20,10 +20,23 @@ def lrelu(x, leak=0.2, name="lrelu"):
 		f2 = 0.5 * (1 - leak)
 		return f1 * x + f2 * abs(x)
 
-def l1_loss(weights, scale, scope=None):
+def number_of_params(weights):
+	total_parameters = 0
+	for variable in weights:
+		# shape is an array of tf.Dimension
+		shape = variable.get_shape()
+		variable_parametes = 1
+		for dim in shape:
+			variable_parametes *= dim.value
+		total_parameters += variable_parametes
+	return total_parameters
+
+def l1_loss_mean(weights, scale, scope=None):
 	l1_regularizer = tf.contrib.layers.l1_regularizer(scale=scale, scope=scope)
 	loss = tf.contrib.layers.apply_regularization(l1_regularizer, weights)
-	return loss
+	num_of_para = number_of_params(weights)
+	print "number of parameters: ",num_of_para
+	return loss/num_of_para
 
 
 class BatchNormalization(object):
@@ -218,7 +231,7 @@ class Generator(object):
 		weights = [self.W['h1'],self.W['h2'],self.W['h3'],
 					self.W['h4'],self.W['h5'],self.W['dh1'],
 					self.W['dh2'],self.W['dh3'],self.W['dh4']]
-		return l1_loss(weights, scale, scope=self.name)
+		return l1_loss_mean(weights, scale, scope=self.name)
 
 	def mask(self, rgb, a):
 		### rgb \in (-1,1), (batch, 32, 32, 32, 3)
@@ -274,7 +287,7 @@ class Discriminator(object):
 
 	def get_spaconv_loss(self, scale):
 		weights = [self.W['h1'],self.W['h2'],self.W['h3'],self.W['h4']]
-		return l1_loss(weights, scale, scope=self.name)
+		return l1_loss_mean(weights, scale, scope=self.name)
 
 
 

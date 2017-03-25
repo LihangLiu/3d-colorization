@@ -186,5 +186,10 @@ epoch 48:
 	40: cwgan
 	    sparse conv: scale=0.1
 
+epoch 49:
+        48: cwgan
+            sparse conv: scale=0.1/numofparams
 
-
+epoch 50:
+	49: cwgan
+            sparse conv: scale=10/numofparams
