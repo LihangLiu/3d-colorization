@@ -167,4 +167,10 @@ epoch 45:
 	    D: rgba->maxpooling->rgba_16->h1
 	    patch net
 
+epoch 46:
+	45: cwgan+mask+mrl
+	    D: rgba->maxpooling->rgba_16->h1
+            patch net
+	    reduce filter size:4->2
+
 

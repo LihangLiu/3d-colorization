@@ -252,8 +252,8 @@ class Discriminator(object):
 
 			# for patch
 			self.pW = {
-				'h1': weight_variable([4, 4, 4, 4, 16]),
-				'h2': weight_variable([4, 4, 4, 16, 32])
+				'h1': weight_variable([2, 2, 2, 4, 16]),
+				'h2': weight_variable([2, 2, 2, 16, 32])
 			}
 
 			self.pb = {
