@@ -236,8 +236,8 @@ class Discriminator(object):
 			self.W = {
 				'h1': weight_variable([4, 4, 4, 4, 16]),
 				'h2': weight_variable([4, 4, 4, 16+4, 32]),
-				'h3': weight_variable([4, 4, 4, 32, 64]),
-				'h4': weight_variable([4, 4, 4, 64, 128]),
+				'h3': weight_variable([4, 4, 4, 32+4, 64]),
+				'h4': weight_variable([4, 4, 4, 64+4, 128]),
 				'h5': weight_variable([2*2*2*128+32, 2]),
 			}
 
@@ -272,12 +272,24 @@ class Discriminator(object):
 		rgba_16 = maxpooling3d(rgba)	#(n,16,16,16,4)
 		shape_16 = rgba_16.get_shape().as_list()
 		noisy_rgba_16 = rgba_16 + tf.random_normal(shape_16,mean=0.0,stddev=1)
+
+		# rgba_8
+		rgba_8 = maxpooling3d(rgba_16)	#(n,8,8,8,4)
+		shape_8 = rgba_8.get_shape().as_list()
+		noisy_rgba_8 = rgba_8 + tf.random_normal(shape_8,mean=0.0,stddev=1)
+
+		# rgba_4
+		rgba_4 = maxpooling3d(rgba_8)	#(n,4,4,4,4)
+		shape_4 = rgba_4.get_shape().as_list()
+		noisy_rgba_4 = rgba_4 + tf.random_normal(shape_4,mean=0.0,stddev=1)
 		
 		# conv
 		h1 = lrelu(conv3d(noisy_rgba, self.W['h1']) + self.b['h1']) #(n,16,16,16,16)
 		h1 = tf.concat([h1,noisy_rgba_16],-1)	#(n,16,16,16,16+4)
 		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))	#(n,8,8,8,32)
+		h2 = tf.concat([h2,noisy_rgba_8],-1)	#(n,8,8,8,32+4)
 		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))	#(n,4,4,4,64)
+		h3 = tf.concat([h3,noisy_rgba_4],-1)	#(n,4,4,4,64+4)
 		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))	#(n,2,2,2,128)
 		h = tf.reshape(h4, [-1, 2*2*2*128])	#(n,2*2*2*128)
 
@@ -312,6 +324,7 @@ class Discriminator(object):
 		res = tf.transpose(res, perm=[1,0,2,3,4,5])				#(n,8*8*8,4,4,4,4)
 		res = tf.reshape(res, [-1,4,4,4,4])
 		return res
+
 
 
 

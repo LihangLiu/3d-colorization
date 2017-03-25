@@ -2,7 +2,7 @@
 +Project="AI_ROBOTICS"
 +ProjectDescription=""
 +GPUJob=true
-Requirements=(TARGET.GPUSlot) && target.machine == "eldar-29.cs.utexas.edu"
+Requirements=(TARGET.GPUSlot) && target.machine == "eldar-26.cs.utexas.edu"
 Environment=PATH=/lusr/opt/condor/bin/:/lusr/opt/condor/bin/:/opt/cuda-8.0/bin:$PATH
 Environment=PYTHONPATH=/u/leonliu/.local/lib/python2.7/site-packages:$PYTHONPATH
 Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:/opt/cuda-8.0/lib:/opt/cuda-8.0/lib64:$LD_LIBRARY_PATH
@@ -10,9 +10,9 @@ Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:
 Universe=vanilla
 Getenv=True
 
-Log=../../outputs/log/foo29.log
-Output=../../outputs/log/out29.log
-Error=../../outputs/log/err29.log
+Log=../../outputs/log/foo26.log
+Output=../../outputs/log/out26.log
+Error=../../outputs/log/err26.log
 Executable=run.sh
 
 
