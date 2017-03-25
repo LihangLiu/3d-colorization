@@ -133,11 +133,11 @@ epoch 39: ****
 	    D: rgba->maxpooling->rgba_16->h1
 	seems better than epoch 32
 
--- wgan    --
+-- cwgan    --
 -- noise_x --
 
 epoch 40:
-	32: cwgan+mask, deeperG
+	32: cwgan
 	    a. minibatch discriminator disabled
 	    b. gan loss changed
 	    c. clip on D
@@ -145,38 +145,39 @@ epoch 40:
 	    noise_x noise stddev=1
 
 epoch 41:
-	40: cwgan+mask, deeperG
+	40: cwgan
 	    noise_x noise stddev=.1
 
 epoch 42:
-        40: cwgan+mask, deeperG
+        40: cwgan
             remove noise_x
 
 -- multi-resolution loss --
 
 epoch 43:
-	42: cwgan+mrl
-	    D: rgba->maxpooling->rgba_16->h1
+	42: cwgan
+	    mrl: D + rgba_16
 
 epoch 44:
-	43: cwgan+mrl
+	43: cwgan
+	    mrl: D + rgba_16
 	    noise_x noise stddev=1
 
 -- patch net & mrl --
 
 epoch 45:
-	44: cwgan+mrl
-	    rgba_16
+	44: cwgan
+	    mrl: D + rgba_16
 	    patch net
 
 epoch 46:
-	45: cwgan+mrl
-            rgba_16
+	45: cwgan
+	    mrl: D + rgba_16
 	    patch net: reduce filter size:4->2
 
 epoch 47:
-	45: cwgan+mrl
-            rgba_16 & rgba_8 & rgba_4
+	45: cwgan
+	    mrl: D + rgba_16 & rgba_16 & rgba_8 & rgba_4
             patch net
 
 -- sparse conv --
