@@ -252,13 +252,16 @@ class Discriminator(object):
 
 	def __call__(self, rgba, train):
 		shape = rgba.get_shape().as_list()		#(n,32,32,32,4)
+		noisy_rgba = rgba + tf.random_normal(shape,mean=0.0,stddev=1)
 
 		# rgba_16
 		rgba_16 = maxpooling3d(rgba)	#(n,16,16,16,4)
+		shape_16 = rgba_16.get_shape().as_list()
+		noisy_rgba_16 = rgba_16 + tf.random_normal(shape_16,mean=0.0,stddev=1)
 		
 		# conv
-		h1 = lrelu(conv3d(rgba, self.W['h1']) + self.b['h1']) #(n,16,16,16,16)
-		h1 = tf.concat([h1,rgba_16],-1)	#(n,16,16,16,16+4)
+		h1 = lrelu(conv3d(noisy_rgba, self.W['h1']) + self.b['h1']) #(n,16,16,16,16)
+		h1 = tf.concat([h1,noisy_rgba_16],-1)	#(n,16,16,16,16+4)
 		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))	#(n,8,8,8,32)
 		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))	#(n,4,4,4,64)
 		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))	#(n,2,2,2,128)

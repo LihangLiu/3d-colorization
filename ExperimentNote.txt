@@ -158,4 +158,8 @@ epoch 43:
 	42: cwgan+mask+mrl, deeperG
 	    D: rgba->maxpooling->rgba_16->h1
 
+epoch 44:
+	43: cwgan+mask+mrl, deeperG
+	    noise_x noise stddev=1
+
 
