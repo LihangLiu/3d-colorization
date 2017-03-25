@@ -20,6 +20,12 @@ def lrelu(x, leak=0.2, name="lrelu"):
 		f2 = 0.5 * (1 - leak)
 		return f1 * x + f2 * abs(x)
 
+def l1_loss(weights, scale, scope=None):
+	l1_regularizer = tf.contrib.layers.l1_regularizer(scale=scale, scope=scope)
+	loss = tf.contrib.layers.apply_regularization(l1_regularizer, weights)
+	return loss
+
+
 class BatchNormalization(object):
 
 	def __init__(self, shape, name, decay=0.9, epsilon=1e-5):
@@ -208,6 +214,12 @@ class Generator(object):
 
 		return rgba
 
+	def get_spaconv_loss(self, scale):
+		weights = [self.W['h1'],self.W['h2'],self.W['h3'],
+					self.W['h4'],self.W['h5'],self.W['dh1'],
+					self.W['dh2'],self.W['dh3'],self.W['dh4']]
+		return l1_loss(weights, scale, scope=self.name)
+
 	def mask(self, rgb, a):
 		### rgb \in (-1,1), (batch, 32, 32, 32, 3)
 		### a \in {-1,1},	(batch, 32, 32, 32, 1)
@@ -259,4 +271,10 @@ class Discriminator(object):
 
 		y = tf.matmul(h, self.W['h5']) + self.b['h5']
 		return y
+
+	def get_spaconv_loss(self, scale):
+		weights = [self.W['h1'],self.W['h2'],self.W['h3'],self.W['h4']]
+		return l1_loss(weights, scale, scope=self.name)
+
+
 

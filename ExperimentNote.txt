@@ -155,22 +155,35 @@ epoch 42:
 -- multi-resolution loss --
 
 epoch 43:
-	42: cwgan+mask+mrl, deeperG
+	42: cwgan+mrl
 	    D: rgba->maxpooling->rgba_16->h1
 
 epoch 44:
-	43: cwgan+mask+mrl, deeperG
+	43: cwgan+mrl
 	    noise_x noise stddev=1
 
+-- patch net & mrl --
+
 epoch 45:
-	44: cwgan+mask+mrl, deeperG
-	    D: rgba->maxpooling->rgba_16->h1
+	44: cwgan+mrl
+	    rgba_16
 	    patch net
 
 epoch 46:
-	45: cwgan+mask+mrl
-	    D: rgba->maxpooling->rgba_16->h1
+	45: cwgan+mrl
+            rgba_16
+	    patch net: reduce filter size:4->2
+
+epoch 47:
+	45: cwgan+mrl
+            rgba_16 & rgba_8 & rgba_4
             patch net
-	    reduce filter size:4->2
+
+-- sparse conv --
+
+epoch 48:
+	40: cwgan
+	    sparse conv: scale=0.1
+
 
 

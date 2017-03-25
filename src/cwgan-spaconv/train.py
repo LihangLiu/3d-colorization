@@ -37,17 +37,23 @@ rgba_ = G(a, z, train)
 y_ = D(rgba_, train)
 y = D(rgba, train)
 
+# l1 loss on conv
+loss_G_spa = tf.reduce_mean(G.get_spaconv_loss(scale=0.1))
+loss_D_spa = tf.reduce_mean(D.get_spaconv_loss(scale=0.1))
+
 label_real = np.zeros([batch_size, 2], dtype=np.float32)
 label_fake = np.zeros([batch_size, 2], dtype=np.float32)
 label_real[:, 0] = 1
 label_fake[:, 1] = 1
 
-loss_G = -tf.reduce_mean(y_)
-loss_D = -tf.reduce_mean(y) + tf.reduce_mean(y_)
+# final loss
+loss_G = -tf.reduce_mean(y_) + loss_G_spa
+loss_D = -tf.reduce_mean(y) + tf.reduce_mean(y_) + loss_D_spa
 
 var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 var_D = [v for v in tf.trainable_variables() if 'd_' in v.name]
 
+# optimizer
 d_rmsprop = tf.train.RMSPropOptimizer(learning_rate=5e-5).minimize(loss_D, var_list=var_D)
 g_rmsprop = tf.train.RMSPropOptimizer(learning_rate=5e-5).minimize(loss_G, var_list = var_G)
 
@@ -66,7 +72,7 @@ print '\nepoch: ', myconfig.version
 print 'loss_csv:', myconfig.loss_csv
 print 'vox_prefix:', myconfig.vox_prefix
 
-saver = tf.train.Saver()
+saver = tf.train.Saver(max_to_keep=0)
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -78,7 +84,7 @@ with tf.Session(config=config) as sess:
     # running
     for epoch in xrange(0, myconfig.ITER_MAX):	
 		### train one epoch ### 
-        loss_list = {'G':[], 'D':[]}
+        loss_list = {'G':[], 'G_spa':[], 'D':[], 'D_spa':[]}
         for i in xrange(total_batch): 
 			# train D
             d_iters = 5
@@ -95,19 +101,24 @@ with tf.Session(config=config) as sess:
 
 			# evaluate
             batch_loss_G = sess.run(loss_G, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
-            batch_loss_D = sess.run(loss_D, feed_dict={a:batch_dict['a'], z:batch_dict['z'], 
-                                                        rgba:batch_dict['rgba'], train:False})
-            print "{0}, {1}, {2:.8f}, {3:.8f}".format(epoch, i, batch_loss_G, batch_loss_D)
+            batch_loss_G_spa = sess.run(loss_G_spa, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
+            batch_loss_D = sess.run(loss_D, feed_dict={a:batch_dict['a'], z:batch_dict['z'], rgba:batch_dict['rgba'], train:False})
+            batch_loss_D_spa = sess.run(loss_D_spa, feed_dict={a:batch_dict['a'], z:batch_dict['z'], rgba:batch_dict['rgba'], train:False})
+            print "%d %d (%.6f,%.6f) (%.6f,%.6f)"%(epoch, i, batch_loss_G, batch_loss_G_spa, batch_loss_D, batch_loss_D_spa)
             loss_list['G'].append(batch_loss_G)
+            loss_list['G_spa'].append(batch_loss_G_spa)
             loss_list['D'].append(batch_loss_D)
+            loss_list['D_spa'].append(batch_loss_D_spa)
 
             gen_iterations +=  1
 
         ### output losses ###
         loss_G_mean = np.mean(loss_list['G'])
+        loss_G_spa_mean = np.mean(loss_list['G_spa'])
         loss_D_mean = np.mean(loss_list['D'])
+        loss_D_spa_mean = np.mean(loss_list['D_spa'])
         with open(myconfig.loss_csv, 'a') as f:
-            msg = "{0}, {1:.8f}, {2:.8f}".format(epoch, loss_G_mean, loss_D_mean)
+            msg = "%d %.6f %.6f %.6f %.6f"%(epoch,loss_G_mean,loss_G_spa_mean,loss_D_mean,loss_D_spa_mean)
             print >> f, msg
             print msg
 
@@ -127,6 +138,7 @@ with tf.Session(config=config) as sess:
 
         if epoch % save_interval == 0:
             saver.save(sess, myconfig.param_prefix+"{0}.ckpt".format(epoch))
+
 
 
 
