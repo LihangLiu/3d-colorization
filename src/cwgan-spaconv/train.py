@@ -38,8 +38,8 @@ y_ = D(rgba_, train)
 y = D(rgba, train)
 
 # l1 loss on conv
-loss_G_spa = tf.reduce_mean(G.get_spaconv_loss(scale=10))
-loss_D_spa = tf.reduce_mean(D.get_spaconv_loss(scale=10))
+loss_G_spa = tf.reduce_mean(G.get_spaconv_loss(scale=10.0))
+loss_D_spa = tf.reduce_mean(D.get_spaconv_loss(scale=10.0))
 
 label_real = np.zeros([batch_size, 2], dtype=np.float32)
 label_fake = np.zeros([batch_size, 2], dtype=np.float32)
@@ -100,10 +100,10 @@ with tf.Session(config=config) as sess:
             sess.run(g_rmsprop, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:True})
 
 			# evaluate
-            batch_loss_G = sess.run(loss_G, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
-            batch_loss_G_spa = sess.run(loss_G_spa, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
-            batch_loss_D = sess.run(loss_D, feed_dict={a:batch_dict['a'], z:batch_dict['z'], rgba:batch_dict['rgba'], train:False})
-            batch_loss_D_spa = sess.run(loss_D_spa, feed_dict={a:batch_dict['a'], z:batch_dict['z'], rgba:batch_dict['rgba'], train:False})
+            [batch_loss_G,batch_loss_G_spa] = sess.run([loss_G,loss_G_spa], 
+                                feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
+            [batch_loss_D,batch_loss_D_spa] = sess.run([loss_D,loss_D_spa], 
+                                feed_dict={a:batch_dict['a'], z:batch_dict['z'], rgba:batch_dict['rgba'], train:False})
             print "%d %d (%.6f,%.6f) (%.6f,%.6f)"%(epoch, i, batch_loss_G, batch_loss_G_spa, batch_loss_D, batch_loss_D_spa)
             loss_list['G'].append(batch_loss_G)
             loss_list['G_spa'].append(batch_loss_G_spa)
@@ -118,7 +118,8 @@ with tf.Session(config=config) as sess:
         loss_D_mean = np.mean(loss_list['D'])
         loss_D_spa_mean = np.mean(loss_list['D_spa'])
         with open(myconfig.loss_csv, 'a') as f:
-            msg = "%d %.6f %.6f %.6f %.6f"%(epoch,loss_G_mean,loss_G_spa_mean,loss_D_mean,loss_D_spa_mean)
+            msg = "%d %.6f %.6f %.6f %.6f %.6f %.6f"%(epoch,loss_G_mean,loss_G_mean-loss_G_spa_mean,loss_G_spa_mean,
+                                                        loss_D_mean,loss_D_mean-loss_D_spa_mean,loss_D_spa_mean)
             print >> f, msg
             print msg
 
