@@ -238,7 +238,7 @@ class Discriminator(object):
 				'h2': weight_variable([4, 4, 4, 16+4, 32]),
 				'h3': weight_variable([4, 4, 4, 32, 64]),
 				'h4': weight_variable([4, 4, 4, 64, 128]),
-				'h5': weight_variable([2*2*2*128, 2]),
+				'h5': weight_variable([2*2*2*128+32, 2]),
 			}
 
 			self.b = {
@@ -250,8 +250,22 @@ class Discriminator(object):
 			self.bn3 = BatchNormalization([64], 'bn3')
 			self.bn4 = BatchNormalization([128], 'bn4')
 
+			# for patch
+			self.pW = {
+				'h1': weight_variable([4, 4, 4, 4, 16]),
+				'h2': weight_variable([4, 4, 4, 16, 32])
+			}
+
+			self.pb = {
+				'h1': bias_variable([16]),
+				'h5': bias_variable([2]),
+			}
+
+			self.pbn2 = BatchNormalization([32], 'pbn2')
+
 	def __call__(self, rgba, train):
 		shape = rgba.get_shape().as_list()		#(n,32,32,32,4)
+		n = shape[0]
 		noisy_rgba = rgba + tf.random_normal(shape,mean=0.0,stddev=1)
 
 		# rgba_16
@@ -265,10 +279,39 @@ class Discriminator(object):
 		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))	#(n,8,8,8,32)
 		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))	#(n,4,4,4,64)
 		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))	#(n,2,2,2,128)
-		h = tf.reshape(h4, [-1, 2*2*2*128])
+		h = tf.reshape(h4, [-1, 2*2*2*128])	#(n,2*2*2*128)
 
+		# patch 
+		rgba_patch = self.getPatches(rgba) 	#(n*8^3,4,4,4,4)
+		shape_patch = rgba_patch.get_shape().as_list()
+		noisy_rgba_patch = rgba_patch + tf.random_normal(shape_patch,mean=0.0,stddev=1)
+		# patch conv
+		ph1 = lrelu(conv3d(noisy_rgba_patch, self.pW['h1']) + self.pb['h1']) #(n*8^3,2,2,2,16)
+		ph2 = lrelu(self.pbn2(conv3d(ph1, self.pW['h2']), train))	#(n*8^3,1,1,1,32)
+		ph2 = tf.reshape(ph2, [-1,8,8,8,32]) 	#(n,8,8,8,32)
+		ph = maxpooling3d(ph2, stride=8)		#(n,1,1,1,32)
+
+		ph = tf.reshape(ph, [-1,32])
+
+		# 
+		h = tf.concat([h,ph], -1)	#(n,2*2*2*128+32)
 		y = tf.matmul(h, self.W['h5']) + self.b['h5']
 		return y
+
+	def getPatches(self,rgba):
+		# rgba: (n,32,32,32,4)
+		rgba = tf.expand_dims(rgba,0) #(1,n,32,32,32,4)
+
+		slices = tf.split(rgba, num_or_size_splits=8, axis=2)	#[(1,n,4,32,32,4)]
+		res = tf.concat(slices, 0) 								#(8,n,4,32,32,4)
+		slices = tf.split(rgba, num_or_size_splits=8, axis=3)	#[(8,n,4,4,32,4)]
+		res = tf.concat(slices, 0) 								#(8*8,n,4,4,32,4)
+		slices = tf.split(rgba, num_or_size_splits=8, axis=4)	#[(8*8,n,4,4,4,4)]
+		res = tf.concat(slices, 0) 								#(8*8*8,n,4,4,4,4)
+		
+		res = tf.transpose(res, perm=[1,0,2,3,4,5])				#(n,8*8*8,4,4,4,4)
+		res = tf.reshape(res, [-1,4,4,4,4])
+		return res
 
 
 
