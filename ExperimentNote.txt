@@ -193,3 +193,9 @@ epoch 49:
 epoch 50:
 	49: cwgan
             sparse conv: scale=10/numofparams
+
+-- vox loss --
+
+epoch 51:
+	40: cwgan + rgbloss
+
