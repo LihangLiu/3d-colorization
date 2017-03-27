@@ -80,11 +80,21 @@ saver.restore(sess, model_path)
 # fetch variables
 batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
 fetches_G = sess.run(loss_G, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
-batch_loss_D = sess.run(loss_D, feed_dict={a:batch_dict['a'], z:batch_dict['z'], 
+fetches_D = sess.run(loss_D, feed_dict={a:batch_dict['a'], z:batch_dict['z'], 
                                                         rgba:batch_dict['rgba'], train:False})
 
+# test
+batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
+tmp_a = batch_dict['a']
+tmp_rgba = batch_dict['rgba']
+np.save("testgt.npy", dataset.transformBack(tmp_rgba[0]))
+fetches_G = sess.run(rgba_, feed_dict={a:tmp_a, z:batch_dict['z'], train:False})
+print 'z:', batch_dict['z'][0,:]
+print fetches_G[0,:,:,0,0]
+np.save("test1.npy", dataset.transformBack(fetches_G[0]))
 
-
-
-
-
+batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
+fetches_G = sess.run(rgba_, feed_dict={a:tmp_a, z:batch_dict['z'], train:False})
+print 'z:', batch_dict['z'][0,:]
+print fetches_G[0,:,:,0,0]
+np.save("test2.npy",dataset.transformBack(fetches_G[0]))

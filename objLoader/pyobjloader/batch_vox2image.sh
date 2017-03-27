@@ -26,12 +26,23 @@ vox2image() {
 #echo $py_dir
 #exit 1
 
-py_dir=`pwd`
-vox_paths=`find $1 -name '*.npy'`
+# check arguments
+if [ "$#" -lt 1 ]; then
+        echo "usage: batch_vox2image.sh path/to/npy/folder [name_rule]"
+        exit 1
+fi
+rule="*.npy"
+if [ "$#" -eq 2 ]; then
+        rule=$2
+fi
+echo "searching for $rule under $1"
+
+vox_paths=`find $1 -name "$rule"`
 IFS=$'\n'
 vox_paths=($vox_paths)
 echo "Total voxels:${#vox_paths[@]}"
 
+py_dir=`pwd`
 for (( i=0; i<${#vox_paths[@]}/8; i++ ));
 do
 	for ((j=0; j<8; j++)); do 
