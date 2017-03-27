@@ -23,7 +23,7 @@ def lrelu(x, leak=0.2, name="lrelu"):
 # filter: (D,H,2,C_in,C_out) | (D,2,W,C_in,C_out) | (2,H,W,C_in,C_out)
 # 	among the 2: (value v, depth d). 
 # -> filter_3d: (D,H,W,C_in,C_out)
-def conv2_5d(x, filter, axis=2, depth=4, stride=2):
+def filter2_5d_to_3d(filter, axis, depth):
 	shape_3d = filter.get_shape().as_list()
 	#
 	if axis not in [0,1,2]:
@@ -34,38 +34,24 @@ def conv2_5d(x, filter, axis=2, depth=4, stride=2):
 		exit(0)
 
 	# list of depth of filiter_3d, [-D/2, D/2]
-	D = 0.2		# factor
+	D = 0.02		# factor
 	alpha = 4.0 # factor
-	di_s = (np.arange(0.0,depth,1.0)/(depth-1)-0.5)*D #(-0.1,0.1)
+	di_s = (np.arange(0.0,depth,1.0)/(depth-1)-0.5)*D #(-0.01,0.01)
 
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)
 	filter_3d = [v*D/(D+alpha*tf.abs(d-di_s[i])) for i in range(depth)]
 	filter_3d = tf.concat(filter_3d, axis)
-
-	# if axis == 2:
-	# 	v = filter[:,:,0,:,:]
-	# 	d = filter[:,:,1,:,:]
-	# 	for i in range(depth):
-	# 		filter_3d.append(v * D/(D+alpha*tf.abs(d-di_s[i])))
-	# elif axis == 1:
-	# 	v = filter[:,0,:,:,:]
-	# 	d = filter[:,1,:,:,:]
-	# 	for i in range(depth):
-	# 		filter_3d[:,i,:,:,:] = v * D/(D+alpha*tf.abs(d-di_s[i]))
-	# elif axis == 0:
-	# 	v = filter[0,:,:,:,:]
-	# 	d = filter[1,:,:,:,:]
-	# 	for i in range(depth):
-	# 		filter_3d[i,:,:,:,:] = v * D/(D+alpha*tf.abs(d-di_s[i]))
-	# else:
-	# 	print "axis must be 0 or 1 or 2, instead of ", axis
-
-	res = conv3d(x, filter_3d, stride=stride)
 	print shape_3d
 	print di_s
 	print v.get_shape()
 	print d.get_shape()
 	print filter_3d.get_shape()
+	return filter_3d
+
+def conv2_5d(x, filter, axis=2, depth=4, stride=2):
+	filter_3d = filter2_5d_to_3d(filter, axis, depth)
+
+	res = conv3d(x, filter_3d, stride=stride)
 	print res.get_shape()
 	return res
 

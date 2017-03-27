@@ -15,6 +15,10 @@ def prepare_batch_dict(data_dict):
     batch_dict = {'rgba':batch_voxels, 'a':batch_a, 'z':batch_z}
     return batch_dict
 
+def prepare_feed_dict(batch_dict, rgba, a, z, train, flag):
+    fetch_dict = {a:batch_dict['a'], z:batch_dict['z'],rgba:batch_dict['rgba'], train:flag}
+    return fetch_dict
+    
 data = dataset.read()
 
 batch_size = 32
@@ -73,28 +77,15 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-epoch = 2000         # specify the wanted model
+epoch = 250         # specify the wanted model
 model_path = myconfig.param_prefix+"{0}.ckpt".format(epoch)
 saver.restore(sess, model_path)
 
 # fetch variables
 batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
-fetches_G = sess.run(loss_G, feed_dict={a:batch_dict['a'], z:batch_dict['z'], train:False})
-fetches_D = sess.run(loss_D, feed_dict={a:batch_dict['a'], z:batch_dict['z'], 
-                                                        rgba:batch_dict['rgba'], train:False})
+feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, train,False)
+fetches_G = sess.run(loss_G, feed_dict=feed_dict)
+W = sess.run(D.W, feed_dict=feed_dict)
 
 # test
-batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
-tmp_a = batch_dict['a']
-tmp_rgba = batch_dict['rgba']
-np.save("testgt.npy", dataset.transformBack(tmp_rgba[0]))
-fetches_G = sess.run(rgba_, feed_dict={a:tmp_a, z:batch_dict['z'], train:False})
-print 'z:', batch_dict['z'][0,:]
-print fetches_G[0,:,:,0,0]
-np.save("test1.npy", dataset.transformBack(fetches_G[0]))
 
-batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
-fetches_G = sess.run(rgba_, feed_dict={a:tmp_a, z:batch_dict['z'], train:False})
-print 'z:', batch_dict['z'][0,:]
-print fetches_G[0,:,:,0,0]
-np.save("test2.npy",dataset.transformBack(fetches_G[0]))
