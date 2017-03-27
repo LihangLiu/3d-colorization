@@ -199,3 +199,12 @@ epoch 50:
 epoch 51:
 	40: cwgan + rgbloss
 
+-- conv 2.5d --
+
+epoch 52:
+	40: cwgan + conv2.5d
+	    limited test on D only
+
+
+
+
