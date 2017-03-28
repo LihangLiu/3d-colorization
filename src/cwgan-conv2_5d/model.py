@@ -63,7 +63,7 @@ def weights_2_5_d(shape):
 
 	filter_3d = []
 	c_out = shape[-1]
-	for axis in [0,1,2]:
+	for axis in [2,2,2]:
 		new_shape = shape[:]	# must be deep copy here
 		new_shape[axis] = 2
 		new_shape[-1] = c_out/3

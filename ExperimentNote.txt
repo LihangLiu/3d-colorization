@@ -215,6 +215,9 @@ epoch 54:
             D: h1-h3
 	    G: h1-h3
 
+epoch 55:
+	54: cwgan + conv2.5d
+	    all z projection
 
 
 
