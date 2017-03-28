@@ -281,36 +281,37 @@ class Generator(object):
 
 class Discriminator(object):
 
-	def __init__(self, name="d_"):
+	def __init__(self, ndf=15, name="d_"):
 		with tf.variable_scope(name):
 			self.name = name
+			self.ndf = ndf
 
 			self.W = {
-				'h1': weights_2_5_d([4, 4, 4, 4, 15]),
-				'h2': weights_2_5_d([4, 4, 4, 15, 30]),
-				'h3': weights_2_5_d([4, 4, 4, 30, 60]),
-				'h4': weight_variable([4, 4, 4, 60, 128]),
-				'h5': weight_variable([2*2*2*128, 2])
+				'h1': weights_2_5_d([4, 4, 4, 4, ndf]),
+				'h2': weights_2_5_d([4, 4, 4, ndf, ndf*2]),
+				'h3': weights_2_5_d([4, 4, 4, ndf*2, ndf*4]),
+				'h4': weight_variable([4, 4, 4, ndf*4, ndf*8]),
+				'h5': weight_variable([2*2*2*ndf*8, 2])
 			}
 
 			self.b = {
-				'h1': bias_variable([15]),
+				'h1': bias_variable([ndf]),
 				'h5': bias_variable([2])
 			}
 
-			self.bn2 = BatchNormalization([30], 'bn2')
-			self.bn3 = BatchNormalization([60], 'bn3')
-			self.bn4 = BatchNormalization([128], 'bn4')
+			self.bn2 = BatchNormalization([ndf*2], 'bn2')
+			self.bn3 = BatchNormalization([ndf*4], 'bn3')
+			self.bn4 = BatchNormalization([ndf*8], 'bn4')
 
 	def __call__(self, x, train):
 		shape = x.get_shape().as_list()		
 		noisy_x = x + tf.random_normal(shape,mean=0.0,stddev=1)
 		
-		h1 = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])	#(n,16,16,16,16)
-		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))		#(n,8,8,8,32)
-		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))		#(n,4,4,4,64)
-		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))		#(n,2,2,2,128)
-		h = tf.reshape(h4, [-1, 2*2*2*128])
+		h1 = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])	#(n,16,16,16,f)
+		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))		#(n,8,8,8,f*2)
+		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))		#(n,4,4,4,f*4)
+		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))		#(n,2,2,2,f*8)
+		h = tf.reshape(h4, [-1, 2*2*2*self.ndf*8])
 
 		y = tf.matmul(h, self.W['h5']) + self.b['h5']
 		return y

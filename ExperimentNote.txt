@@ -208,11 +208,12 @@ epoch 52:
 
 epoch 53:
 	52: cwgan + conv2.5d
-	    test on D
+	    D: h1-h3
 
 epoch 54:
 	52: cwgan + conv2.5d
-            test on D & G
+            D: h1-h3
+	    G: h1-h3
 
 
 
