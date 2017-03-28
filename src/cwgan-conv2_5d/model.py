@@ -204,7 +204,7 @@ def vbn(x, name):
 ### 
 class Generator(object):
 
-	def __init__(self, z_size=5, ngf=8, name="g_"):
+	def __init__(self, z_size=5, ngf=9, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ngf = ngf
@@ -212,9 +212,9 @@ class Generator(object):
 			self.W = {
 				'hz': weight_variable([z_size, 32*32*32*1]),
 
-				'h1': weight_variable([4, 4, 4, 2, ngf]),
-				'h2': weight_variable([4, 4, 4, ngf, ngf*2]),
-				'h3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
+				'h1': weights_2_5_d([4, 4, 4, 2, ngf]),
+				'h2': weights_2_5_d([4, 4, 4, ngf, ngf*2]),
+				'h3': weights_2_5_d([4, 4, 4, ngf*2, ngf*4]),
 				'h4': weight_variable([4, 4, 4, ngf*4, ngf*8]),
 				'h5': weight_variable([4, 4, 4, ngf*8, ngf*8]),
 
@@ -336,8 +336,18 @@ if __name__ == '__main__':
 	# 	print r1
 	# 	print r2
 
+	batch_size = 32
+	z_size = 5
+	z = tf.placeholder(tf.float32, [batch_size, z_size])
+	a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
+	rgba = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 4])
+	train = tf.placeholder(tf.bool)
+	G = Generator(z_size)
+	D = Discriminator()
 
-
+	rgba_ = G(a, z, train)
+	y_ = D(rgba_, train)
+	y = D(rgba, train)
 
 
 
