@@ -77,8 +77,7 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-epoch = 250         # specify the wanted model
-model_path = myconfig.param_prefix+"{0}.ckpt".format(epoch)
+model_path = "../../outputs/params/params52_250.ckpt"
 saver.restore(sess, model_path)
 
 # fetch variables

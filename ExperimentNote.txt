@@ -203,8 +203,16 @@ epoch 51:
 
 epoch 52:
 	40: cwgan + conv2.5d
-	    limited test on D only
+	    limited test on z dimension on D only
 	    D=0.02 # bug in 0.2 because wgan clip all D weights to be (-0.01,0.01)
+
+epoch 53:
+	52: cwgan + conv2.5d
+	    test on D
+
+epoch 54:
+	52: cwgan + conv2.5d
+            test on D & G
 
 
 

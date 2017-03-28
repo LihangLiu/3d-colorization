@@ -23,7 +23,7 @@ def lrelu(x, leak=0.2, name="lrelu"):
 # filter: (D,H,2,C_in,C_out) | (D,2,W,C_in,C_out) | (2,H,W,C_in,C_out)
 # 	among the 2: (value v, depth d). 
 # -> filter_3d: (D,H,W,C_in,C_out)
-def filter2_5d_to_3d(filter, axis, depth):
+def flt2_5d_to_3d(filter, axis, depth):
 	shape_3d = filter.get_shape().as_list()
 	#
 	if axis not in [0,1,2]:
@@ -41,19 +41,39 @@ def filter2_5d_to_3d(filter, axis, depth):
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)
 	filter_3d = [v*D/(D+alpha*tf.abs(d-di_s[i])) for i in range(depth)]
 	filter_3d = tf.concat(filter_3d, axis)
-	print shape_3d
 	print di_s
+	print shape_3d
 	print v.get_shape()
 	print d.get_shape()
 	print filter_3d.get_shape()
 	return filter_3d
 
 def conv2_5d(x, filter, axis=2, depth=4, stride=2):
-	filter_3d = filter2_5d_to_3d(filter, axis, depth)
+	filter_3d = flt2_5d_to_3d(filter, axis, depth)
 
 	res = conv3d(x, filter_3d, stride=stride)
 	print res.get_shape()
 	return res
+
+# recommended shape: (4,4,4,c_in,c_out)
+def weights_2_5_d(shape):
+	if len(shape) != 5:
+		print "wrong dimensions, should be 5"
+		exit(0)
+
+	filter_3d = []
+	c_out = shape[-1]
+	for axis in [0,1,2]:
+		new_shape = shape[:]	# must be deep copy here
+		new_shape[axis] = 2
+		new_shape[-1] = c_out/3
+		filter2_5d = weight_variable(new_shape)
+		filter_3d.append(flt2_5d_to_3d(filter2_5d, axis, shape[axis]))
+	filter_3d = tf.concat(filter_3d, -1)
+	print filter_3d.get_shape()
+	return filter_3d
+
+
 
 class BatchNormalization(object):
 
@@ -266,29 +286,29 @@ class Discriminator(object):
 			self.name = name
 
 			self.W = {
-				'h1': weight_variable([4, 4, 2, 4, 16]),
-				'h2': weight_variable([4, 4, 2, 16, 32]),
-				'h3': weight_variable([4, 4, 2, 32, 64]),
-				'h4': weight_variable([4, 4, 4, 64, 128]),
+				'h1': weights_2_5_d([4, 4, 4, 4, 15]),
+				'h2': weights_2_5_d([4, 4, 4, 15, 30]),
+				'h3': weights_2_5_d([4, 4, 4, 30, 60]),
+				'h4': weight_variable([4, 4, 4, 60, 128]),
 				'h5': weight_variable([2*2*2*128, 2])
 			}
 
 			self.b = {
-				'h1': bias_variable([16]),
+				'h1': bias_variable([15]),
 				'h5': bias_variable([2])
 			}
 
-			self.bn2 = BatchNormalization([32], 'bn2')
-			self.bn3 = BatchNormalization([64], 'bn3')
+			self.bn2 = BatchNormalization([30], 'bn2')
+			self.bn3 = BatchNormalization([60], 'bn3')
 			self.bn4 = BatchNormalization([128], 'bn4')
 
 	def __call__(self, x, train):
 		shape = x.get_shape().as_list()		
 		noisy_x = x + tf.random_normal(shape,mean=0.0,stddev=1)
 		
-		h1 = lrelu(conv2_5d(noisy_x, self.W['h1']) + self.b['h1'])	#(n,16,16,16,16)
-		h2 = lrelu(self.bn2(conv2_5d(h1, self.W['h2']), train))		#(n,8,8,8,32)
-		h3 = lrelu(self.bn3(conv2_5d(h2, self.W['h3']), train))		#(n,4,4,4,64)
+		h1 = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])	#(n,16,16,16,16)
+		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))		#(n,8,8,8,32)
+		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))		#(n,4,4,4,64)
 		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))		#(n,2,2,2,128)
 		h = tf.reshape(h4, [-1, 2*2*2*128])
 
@@ -303,9 +323,10 @@ if __name__ == '__main__':
 	# W = weight_variable([4, 4, 2, 4, 16])
 	# res = conv2_5d(rgba, W, axis=2, depth=4)
 	
-	# rgba = tf.placeholder(tf.float32, [32, 1, 4, 4, 1])
-	# W = bias_variable([1, 4, 2, 1, 1])
-	# res = conv2_5d(rgba, W, axis=2, depth=4)
+	# rgba = tf.placeholder(tf.float32, [32, 4, 4, 4, 15])
+	# W = weights_2_5_d([4,4,4,15,30])
+	# res = conv3d(rgba, W)
+	# print res
 
 	# with tf.Session() as sess:
 	# 	sess.run(tf.global_variables_initializer())
@@ -314,6 +335,7 @@ if __name__ == '__main__':
 	# 	r1, r2 = sess.run([W, res], feed_dict={rgba:data})
 	# 	print r1
 	# 	print r2
+
 
 
 
