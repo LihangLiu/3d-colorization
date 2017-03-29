@@ -203,7 +203,7 @@ epoch 51:
 
 epoch 52:
 	40: cwgan + conv2.5d
-	    D=0.02 # bug in 0.2 because wgan clip all D weights to be (-0.01,0.01)
+	    D=0.02, alpha=4 	# bug in 0.2 because wgan clip all D weights to be (-0.01,0.01)
 	    D: h1-h3, z project
 
 epoch 53:
@@ -212,19 +212,24 @@ epoch 53:
 
 epoch 54:
 	52: cwgan + conv2.5d
+	    D=0.02, alpha=4
             D: h1-h3, xyz project
 	    G: h1-h3, xyz project
 
 epoch 55:
 	54: cwgan + conv2.5d
+	    D=0.02, alpha=4
 	    D: h1-h3, z project
 	    G: h1-h3, z project
 
 epoch 56:
 	54: cwgan + conv2.5d
+	    D=0.02, alpha=8
 	    D: h1-h4, xyz project
 	    G: h1-h4, xyz project
-	    alpha=8
+
+
+
 
 
 
