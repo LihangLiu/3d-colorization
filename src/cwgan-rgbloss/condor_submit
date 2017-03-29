@@ -1,8 +1,8 @@
 +Group="GRAD"
 +Project="AI_ROBOTICS"
-+ProjectDescription=""
++ProjectDescription="3d-colorization"
 +GPUJob=true
-Requirements=(TARGET.GPUSlot) && target.machine == "eldar-22.cs.utexas.edu"
+Requirements=(TARGET.GPUSlot) && Eldar == True
 Environment=PATH=/lusr/opt/condor/bin/:/lusr/opt/condor/bin/:/opt/cuda-8.0/bin:$PATH
 Environment=PYTHONPATH=/u/leonliu/.local/lib/python2.7/site-packages:$PYTHONPATH
 Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:/opt/cuda-8.0/lib:/opt/cuda-8.0/lib64:$LD_LIBRARY_PATH
@@ -10,9 +10,9 @@ Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:
 Universe=vanilla
 Getenv=True
 
-Log=../../outputs/log/foo22.log
-Output=../../outputs/log/out22.log
-Error=../../outputs/log/err22.log
+Log=../../outputs/log/log.$(Cluster).$(Process) 
+Output=../../outputs/log/out.$(Cluster).$(Process) 
+Error=../../outputs/log/err.$(Cluster).$(Process)
 Executable=run.sh
 
 
