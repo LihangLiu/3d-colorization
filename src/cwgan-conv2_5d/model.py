@@ -35,7 +35,7 @@ def flt2_5d_to_3d(filter, axis, depth):
 
 	# list of depth of filiter_3d, [-D/2, D/2]
 	D = 0.02		# factor
-	alpha = 8.0 # factor
+	alpha = 4.0 # factor
 	di_s = (np.arange(0.0,depth,1.0)/(depth-1)-0.5)*D #(-0.01,0.01)
 
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)
@@ -63,7 +63,7 @@ def weights_2_5_d(shape):
 
 	filter_3d = []
 	c_out = shape[-1]
-	for axis in [0,1,2]:
+	for axis in [1,1,1]:		# projected axises
 		new_shape = shape[:]	# must be deep copy here
 		new_shape[axis] = 2
 		new_shape[-1] = c_out/3
