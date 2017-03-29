@@ -1,6 +1,6 @@
 dataset_path = "../../data/npy_list.txt"
 
-version = 56
+version = 57
 ITER_MAX = 2001
 loss_csv = "../../outputs/losses/loss_%d.csv"%(version)
 vox_prefix = "../../outputs/voxels/epoch%d_"%(version)

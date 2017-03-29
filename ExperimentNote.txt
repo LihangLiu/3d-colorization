@@ -228,7 +228,11 @@ epoch 56:
 	    D: h1-h4, xyz project
 	    G: h1-h4, xyz project
 
-
+epoch 57:
+	54: cwgan + conv2.5d
+            D=0.02, alpha=8
+            D: h1-h3, xyz project
+            G: h1-h3, xyz project
 
 
 

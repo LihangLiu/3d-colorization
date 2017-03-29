@@ -215,7 +215,7 @@ class Generator(object):
 				'h1': weights_2_5_d([4, 4, 4, 2, ngf]),
 				'h2': weights_2_5_d([4, 4, 4, ngf, ngf*2]),
 				'h3': weights_2_5_d([4, 4, 4, ngf*2, ngf*4]),
-				'h4': weights_2_5_d([4, 4, 4, ngf*4, ngf*8]),
+				'h4': weight_variable([4, 4, 4, ngf*4, ngf*8]),
 				'h5': weight_variable([4, 4, 4, ngf*8, ngf*8]),
 
 				'dh1': weight_variable([4, 4, 4, ngf*8, ngf*8]),
@@ -290,7 +290,7 @@ class Discriminator(object):
 				'h1': weights_2_5_d([4, 4, 4, 4, ndf]),
 				'h2': weights_2_5_d([4, 4, 4, ndf, ndf*2]),
 				'h3': weights_2_5_d([4, 4, 4, ndf*2, ndf*4]),
-				'h4': weights_2_5_d([4, 4, 4, ndf*4, ndf*8]),
+				'h4': weight_variable([4, 4, 4, ndf*4, ndf*8]),
 				'h5': weight_variable([2*2*2*ndf*8, 2])
 			}
 
