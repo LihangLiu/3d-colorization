@@ -2,7 +2,25 @@
 +Project="AI_ROBOTICS"
 +ProjectDescription="3d-colorization"
 +GPUJob=true
-Requirements=(TARGET.GPUSlot) && Eldar == True
+Requirements=(TARGET.GPUSlot) && (TARGET.MACHINE=="eldar-11.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-12.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-13.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-14.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-15.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-16.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-17.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-18.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-19.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-20.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-21.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-22.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-23.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-24.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-25.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-26.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-27.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-28.cs.utexas.edu" \
+             || TARGET.MACHINE=="eldar-29.cs.utexas.edu")
 Environment=PATH=/lusr/opt/condor/bin/:/lusr/opt/condor/bin/:/opt/cuda-8.0/bin:$PATH
 Environment=PYTHONPATH=/u/leonliu/.local/lib/python2.7/site-packages:$PYTHONPATH
 Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:/opt/cuda-8.0/lib:/opt/cuda-8.0/lib64:$LD_LIBRARY_PATH
