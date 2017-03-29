@@ -1,6 +1,6 @@
 +Group="GRAD"
 +Project="AI_ROBOTICS"
-+ProjectDescription="epoch 56"
++ProjectDescription="3d-colorization"
 +GPUJob=true
 Requirements=(TARGET.GPUSlot) && Eldar == True
 Environment=PATH=/lusr/opt/condor/bin/:/lusr/opt/condor/bin/:/opt/cuda-8.0/bin:$PATH
@@ -10,9 +10,9 @@ Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:
 Universe=vanilla
 Getenv=True
 
-Log=../../outputs/log/log.$(Process) 
-Output=../../outputs/log/out.$(Process) 
-Error=../../outputs/log/err.$(Process)
+Log=../../outputs/log/log.$(Cluster).$(Process) 
+Output=../../outputs/log/out.$(Cluster).$(Process) 
+Error=../../outputs/log/err.$(Cluster).$(Process)
 Executable=run.sh
 
 
