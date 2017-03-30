@@ -266,6 +266,8 @@ epoch 62：
             G: h1-h5, xyz project
             G: dh1-dh5, xyz project
 
+-- relu for conv2.5d conversion --
+
 epoch 63:
 	60: cwgan + conv2.5d
             D=0.02, max(1-d,0)
