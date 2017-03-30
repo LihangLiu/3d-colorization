@@ -21,6 +21,7 @@ Requirements=(TARGET.GPUSlot) && (TARGET.MACHINE=="eldar-11.cs.utexas.edu" \
              || TARGET.MACHINE=="eldar-27.cs.utexas.edu" \
              || TARGET.MACHINE=="eldar-28.cs.utexas.edu" \
              || TARGET.MACHINE=="eldar-29.cs.utexas.edu")
+Rank=memory
 Environment=PATH=/lusr/opt/condor/bin/:/lusr/opt/condor/bin/:/opt/cuda-8.0/bin:$PATH
 Environment=PYTHONPATH=/u/leonliu/.local/lib/python2.7/site-packages:$PYTHONPATH
 Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:/opt/cuda-8.0/lib:/opt/cuda-8.0/lib64:$LD_LIBRARY_PATH
