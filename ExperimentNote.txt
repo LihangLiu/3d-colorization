@@ -266,8 +266,19 @@ epoch 62：
             G: h1-h5, xyz project
             G: dh1-dh5, xyz project
 
+epoch 63:
+	60: cwgan + conv2.5d
+            D=0.02, max(1-d,0)
+            D: h1-h4, xyz project
+            G: h1-h5, xyz project
+            G: dh1-dh5, xyz project
 
-
+epoch 64:
+        63: cwgan + conv2.5d
+            D=0.02, max(1-alpha*d,0)
+            D: h1-h4, xyz project
+            G: h1-h5, xyz project
+            G: dh1-dh5, xyz project
 
 
 
