@@ -39,12 +39,12 @@ def flt2_5d_to_3d(filter, axis, depth):
 	# list of depth of filiter_3d, [-D/2, D/2]
 	D = 0.02		# factor
 	with tf.variable_scope(ALPHA_NAME):
-		alpha = 10*bias_variable([])	# init to be 1
+		alpha = 10*bias_variable([])	# init to be 1.0
 	di_s = (np.arange(0.0,depth,1.0)/(depth-1)-0.5)*D #(-0.01,0.01)
 
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)
 	# filter_3d = [v*D/(D+alpha*tf.abs(d-di_s[i])) for i in range(depth)]
-	filter_3d = [v*tf.maximum(1-alpha*(depth-1)*tf.abs(d-di_s[i])/D, 0) 
+	filter_3d = [v*tf.exp(-alpha*tf.square((d-di_s[i])/D))
 												for i in range(depth)]
 	filter_3d = tf.concat(filter_3d, axis)
 	print di_s
