@@ -206,7 +206,7 @@ def vbn(x, name):
 ### 
 class Generator(object):
 
-	def __init__(self, z_size=5, ngf=9, name="g_"):
+	def __init__(self, z_size=5, ngf=12, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ngf = ngf
@@ -283,7 +283,7 @@ class Generator(object):
 
 class Discriminator(object):
 
-	def __init__(self, ndf=15, name="d_"):
+	def __init__(self, ndf=21, name="d_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ndf = ndf
