@@ -26,6 +26,7 @@ def pltVox(voxname):
 	start = time.time()
 	# load .npy file
 	vox = np.load(voxname) 	
+	print vox.shape
 
 	# draw 
 	fig = plt.figure()
@@ -35,6 +36,10 @@ def pltVox(voxname):
 	ax.set_xlim(0, dim)
 	ax.set_ylim(0, dim)
 	ax.set_zlim(0, dim)
+	ax.set_xlabel('X')
+	ax.set_ylabel('Y')
+	ax.set_zlabel('Z')
+
 	xs,ys,zs,rgbs = getPoints(vox)
 	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs, s=5)
 
