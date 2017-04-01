@@ -312,7 +312,7 @@ epoch 67:
 -- all alpha will be clip to 0.01 --
 -- rerun needed --
 
-epoch 70:
+epoch 70:   
 	62: cwgan + conv2.5d
             D=0.02, alpha: constant->variable
             D: h1-h4, xyz project
