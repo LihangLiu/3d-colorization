@@ -349,9 +349,6 @@ epoch 1002:
 -- rerun needed --
 
 epoch 1003:
-	1001: cwgan
-
-epoch 1004:
         1002: cwgan + conv2_5d
 	    D=0.02, exp(-alpha*d^2), init alpha=1.0
             D: h1-h4, xyz project

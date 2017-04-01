@@ -23,6 +23,9 @@ def lrelu(x, leak=0.2, name="lrelu"):
 # filter: (D,H,2,C_in,C_out) | (D,2,W,C_in,C_out) | (2,H,W,C_in,C_out)
 # 	among the 2: (value v, depth d). 
 # -> filter_3d: (D,H,W,C_in,C_out)
+
+ALPHA_NAME = "alpha"    # not clip by d
+
 def flt2_5d_to_3d(filter, axis, depth):
 	shape_3d = filter.get_shape().as_list()
 	#
@@ -35,7 +38,8 @@ def flt2_5d_to_3d(filter, axis, depth):
 
 	# list of depth of filiter_3d, [-D/2, D/2]
 	D = 0.02		# factor
-	alpha = 10*bias_variable([])	# init to be 1.0
+	with tf.variable_scope(ALPHA_NAME):
+		alpha = 10*bias_variable([])	# init to be 1.0
 	di_s = (np.arange(0.0,depth,1.0)/(depth-1)-0.5)*D #(-0.01,0.01)
 
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)

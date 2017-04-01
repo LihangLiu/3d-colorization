@@ -55,7 +55,10 @@ var_D = [v for v in tf.trainable_variables() if 'd_' in v.name]
 d_rmsprop = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(loss_D, var_list=var_D)
 g_rmsprop = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(loss_G, var_list = var_G)
 
-d_clip = [v.assign(tf.clip_by_value(v, -0.01, 0.01)) for v in var_D]
+# D clip, except for alpha
+var_D_clip = [v for v in tf.trainable_variables() 
+		if 'd_' in v.name and model.ALPHA_NAME not in v.name]
+d_clip = [v.assign(tf.clip_by_value(v, -0.01, 0.01)) for v in var_D_clip]
 
 
 print 'var_G'
@@ -63,6 +66,9 @@ for v in var_G:
     print v
 print 'var_D'
 for v in var_D:
+    print v
+print 'var_D_clip'
+for v in var_D_clip:
     print v
 
 print '\nepoch: ', myconfig.version
