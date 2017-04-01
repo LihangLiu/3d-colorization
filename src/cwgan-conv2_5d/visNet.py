@@ -77,7 +77,7 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-model_path = "../../outputs/params/params59_50.ckpt"
+model_path = "../../outputs/params/params65_450.ckpt"
 saver.restore(sess, model_path)
 
 # fetch variables
@@ -97,5 +97,19 @@ W = sess.run(D.W, feed_dict=feed_dict)
 print 'd h3'
 print W['h3'][:,:,:,5,7]
 
-# test
+# 
+batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
+feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, train,False)
+voxels_ = sess.run(rgba_, feed_dict=feed_dict)
+np.save("test1.npy",dataset.transformBack(voxels_[0]))
+
+batch_dict['rgba'][1] = batch_dict['rgba'][0]
+feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, train,False)
+voxels_ = sess.run(rgba_, feed_dict=feed_dict)
+np.save("test2.npy",dataset.transformBack(voxels_[1]))
+
+sess.close()
+
+
+
 
