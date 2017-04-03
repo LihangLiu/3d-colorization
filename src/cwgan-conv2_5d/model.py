@@ -38,8 +38,8 @@ def flt2_5d_to_3d(filter, axis, depth):
 
 	# list of depth of filiter_3d, [-D/2, D/2]
 	D = 0.02		# factor
-	with tf.variable_scope(ALPHA_NAME):
-		alpha = 10*bias_variable([])	# init to be 1.0
+	#with tf.variable_scope(ALPHA_NAME):
+	alpha = 300*bias_variable([])	# init to be 3.0, D clip considerred
 	di_s = (np.arange(0.0,depth,1.0)/(depth-1)-0.5)*D #(-0.01,0.01)
 
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)
