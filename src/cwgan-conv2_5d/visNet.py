@@ -26,6 +26,7 @@ lr = 5e-5
 z_size = 5
 save_interval = 50
 
+
 ###  input variables
 z = tf.placeholder(tf.float32, [batch_size, z_size])
 a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
@@ -77,7 +78,7 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-model_path = "../../outputs/params/params65_450.ckpt"
+model_path = "../../outputs/params/params72_950.ckpt"
 saver.restore(sess, model_path)
 
 # fetch variables
@@ -96,6 +97,14 @@ print W['dh3'][:,:,:,1,3]
 W = sess.run(D.W, feed_dict=feed_dict)
 print 'd h3'
 print W['h3'][:,:,:,5,7]
+
+for v in tf.trainable_variables():
+	if 'alpha' in v.name:
+		print v.name
+		print sess.run(v, feed_dict=feed_dict)
+
+sess.close()
+exit(0)
 
 # 
 batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))

@@ -44,7 +44,7 @@ def flt2_5d_to_3d(filter, axis, depth):
 
 	v,d = tf.split(filter, num_or_size_splits=2, axis=axis)
 	# filter_3d = [v*D/(D+alpha*tf.abs(d-di_s[i])) for i in range(depth)]
-	filter_3d = [v*tf.exp(-alpha*tf.square((d-di_s[i])/D))
+	filter_3d = [v*tf.exp(-alpha*tf.square((depth-1)*(d-di_s[i])/D))
 												for i in range(depth)]
 	filter_3d = tf.concat(filter_3d, axis)
 	print di_s
