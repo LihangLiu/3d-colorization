@@ -3,6 +3,7 @@ import collections
 import glob
 import os
 import random
+import time
 
 import config
 
@@ -13,6 +14,7 @@ class Dataset:
 	def __init__(self):
 		self.name = "real, not jittered"
 		print "dataset is ", self.name
+		print config.dataset_path
 
 		self.index_in_epoch = 0
 		self.examples = np.array(self.read_txt(config.dataset_path))
@@ -44,13 +46,20 @@ class Dataset:
 	def read_data(self, start, end):
 		# 
 		batch = {'rgba':[]}
-
+		#s = time.time()
 		for fname in self.examples[start:end]:
-			vox = np.load(fname)
+			if '64.points.npy' in fname:
+				points = np.load(fname)
+				vox = points2vox(points,64)
+			elif '32.points.npy' in fname:
+                                points = np.load(fname)
+                                vox = points2vox(points,32)
+			else:
+				vox = np.load(fname)
 			#vox = voxJitter(vox)
 			data = transformTo(vox)
 			batch['rgba'].append(data['rgba'])
-
+		#print 'time ', time.time()-s
 		batch['rgba'] = np.array(batch['rgba'])
 		return batch
 
@@ -73,6 +82,21 @@ def transformBack(vox):
 	vox[:,:,:,0:3] = vox[:,:,:,0:3]*0.5+0.5
 	return vox
 
+
+def points2vox(points,N):
+# points: (n,5)
+#       (n,0) -> x
+#       (n,1) -> y
+#       (n,2) -> z
+#       (n,3:6) -> rgb
+        xs = points[:,0].astype(int)
+        ys = points[:,1].astype(int)
+        zs = points[:,2].astype(int)
+        rgb = points[:,3:6]
+        vox = np.zeros((N,N,N,4))
+        vox[xs,ys,zs,0:3] = rgb
+        vox[xs,ys,zs,3] = 1
+        return vox
 
 ######### voxel jitter #########
 
