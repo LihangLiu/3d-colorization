@@ -176,6 +176,8 @@ void LoadObj2Vox(char* filename, Grid3D& grid) {
 
 	// load all texture images and put into a dict: {"mtl_id": image}
 	//printf("mtl size %d\n", materials.size());
+	//printf("vertices size %d\n", vertices.size());
+	//printf("grid size %d\n", grid.N);
 	//for (int i=0; i<materials.size(); ++i) {
 	//	float* mtl_diffuse = materials[i].diffuse;
 	//	printf("%f %f %f \n", mtl_diffuse[0], mtl_diffuse[1], mtl_diffuse[2]);
@@ -233,6 +235,7 @@ void LoadObj2Vox(char* filename, Grid3D& grid) {
 			sampleTriangleInGrid(grid, v1, v2, v3, mtl_diffuse);
 		}	
 	}    
+	//printf("finish\n");
 
 }
 

@@ -21,14 +21,29 @@ def getPoints(vox):
 	rgbs = vox[xs,ys,zs,0:3]
 	return xs,ys,zs,rgbs
 
+def points2vox(points,N):
+# points: (n,5)
+#	(n,0) -> x
+#       (n,1) -> y
+#       (n,2) -> z
+#       (n,3:6) -> rgb
+	xs = points[:,0].astype(int)
+	ys = points[:,1].astype(int)
+	zs = points[:,2].astype(int)
+	rgb = points[:,3:6]
+	vox = np.zeros((N,N,N,4))
+	vox[xs,ys,zs,0:3] = rgb
+	vox[xs,ys,zs,3] = 1
+	return vox
 
-def pltVox(voxname):
+def pltPoints(pointname,N):
 	start = time.time()
 	# load .npy file
 	s = time.time()
-	vox = np.load(voxname)
-	print 'load time ', time.time()-s 	
-	print vox.shape
+	points = np.load(pointname) 	
+	print 'time ', time.time()-s
+	print points.shape
+	vox = points2vox(points,N)
 
 	# draw 
 	fig = plt.figure()
@@ -50,8 +65,9 @@ def pltVox(voxname):
 	
 
 if __name__ == '__main__':
-	voxname = os.path.abspath(sys.argv[1])
-	pltVox(voxname)
+	N = int(sys.argv[1])
+	pointname = os.path.abspath(sys.argv[2])
+	pltPoints(pointname,N)
 
 
 

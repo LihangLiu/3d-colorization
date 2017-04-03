@@ -66,7 +66,17 @@ def pltVox(vox):
 if __name__ == '__main__':
 	voxname = os.path.abspath(sys.argv[1])
 	# load .npy file
-	vox = np.load(voxname) 	
+	vox = np.load(voxname)
+
+	# test loading speed
+	start = time.time()
+	for i in range(32):
+		s = time.time()
+		vox = np.load(voxname)
+		print time.time()-s
+	print time.time()-start
+	exit(0)
+
 	# downsample
 	#vox = downsample(vox)
 	#vox = maxpooling(vox)
