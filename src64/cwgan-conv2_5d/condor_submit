@@ -32,8 +32,7 @@ Getenv=True
 Log=../../outputs/log/log.$(Cluster).$(Process) 
 Output=../../outputs/log/out.$(Cluster).$(Process) 
 Error=../../outputs/log/err.$(Cluster).$(Process)
-Executable=run.sh
+Executable=run1004.sh
 
 
 Queue 1
-

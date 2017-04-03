@@ -95,10 +95,14 @@ with tf.Session(config=config) as sess:
             if gen_iterations % 500 == 0 or gen_iterations < 25:
                  d_iters = 100
             for j in range(0, d_iters):
+		start = time.time()
                 batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
                 feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, train,True)
+		print 'load time ', time.time()-start
+		start = time.time()
                 sess.run(d_clip)
                 sess.run(d_rmsprop, feed_dict=feed_dict)
+		print 'sess time ', time.time()-start
 
             # train G
             batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))

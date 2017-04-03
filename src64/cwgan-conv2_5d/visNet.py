@@ -26,6 +26,13 @@ lr = 5e-5
 z_size = 5
 save_interval = 50
 
+# test data reading speed
+start = time.time()
+print 'start loading'
+batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
+print 'data loading time for one batch:', time.time()-start
+exit(0)
+
 ###  input variables
 z = tf.placeholder(tf.float32, [batch_size, z_size])
 a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
