@@ -3,4 +3,5 @@ outputs/*
 data/*
 *.pyc
 */*.pyc
-
+**/condor_submit
+**/run*.sh

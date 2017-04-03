@@ -78,7 +78,7 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-model_path = "../../outputs/params/params72_950.ckpt"
+model_path = "../../outputs/params/params73_250.ckpt"
 saver.restore(sess, model_path)
 
 # fetch variables
