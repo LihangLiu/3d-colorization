@@ -326,19 +326,19 @@ epoch 71:
 	    
 epoch 72:**
 	66: cwgan + conv2.5d
-            D=0.02, exp(-alpha*(d/D)^2), init alpha=1.0
+            D=0.02, exp(-alpha*(d/3)^2), init alpha=1.0
             D: h1-h4, xyz project
             G: h1-h5, dh1-dh5, xyz project
 	    
 epoch 73:
         72: cwgan + conv2.5d
-            D=0.02, exp(-alpha*(d/(D/depth-1))^2), init alpha=1.0
+            D=0.02, exp(-alpha*(d)^2), init alpha=1.0
             D: h1-h4, xyz project
             G: h1-h5, dh1-dh5, xyz project
 	    
 epoch 74:
         73: cwgan + conv2.5d
-            D=0.02, exp(-alpha*(d/(D/depth-1))^2), init alpha=3.0, enable D clip on alpha
+            D=0.02, exp(-alpha*(d)^2), init alpha=0.1
             D: h1-h4, xyz project
             G: h1-h5, dh1-dh5, xyz project
 
