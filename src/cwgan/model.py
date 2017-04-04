@@ -20,6 +20,7 @@ def lrelu(x, leak=0.2, name="lrelu"):
 		f2 = 0.5 * (1 - leak)
 		return f1 * x + f2 * abs(x)
 
+
 class BatchNormalization(object):
 
 	def __init__(self, shape, name, decay=0.9, epsilon=1e-5):
@@ -149,7 +150,7 @@ def vbn(x, name):
 ### 
 class Generator(object):
 
-	def __init__(self, z_size=5, ngf=8, name="g_"):
+	def __init__(self, z_size=5, ngf=12, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ngf = ngf
@@ -157,17 +158,17 @@ class Generator(object):
 			self.W = {
 				'hz': weight_variable([z_size, 32*32*32*1]),
 
-				'h1': weight_variable([4, 4, 4, 2, ngf]),
-				'h2': weight_variable([4, 4, 4, ngf, ngf*2]),
-				'h3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
-				'h4': weight_variable([4, 4, 4, ngf*4, ngf*8]),
-				'h5': weight_variable([4, 4, 4, ngf*8, ngf*8]),
+				'h1': weight_variable([2, 2, 2, 2, ngf]),
+				'h2': weight_variable([2, 2, 2, ngf, ngf*2]),
+				'h3': weight_variable([2, 2, 2, ngf*2, ngf*4]),
+				'h4': weight_variable([2, 2, 2, ngf*4, ngf*8]),
+				'h5': weight_variable([2, 2, 2, ngf*8, ngf*8]),
 
-				'dh1': weight_variable([4, 4, 4, ngf*8, ngf*8]),
-				'dh2': weight_variable([4, 4, 4, ngf*4, ngf*8]),
-				'dh3': weight_variable([4, 4, 4, ngf*2, ngf*4]),
-				'dh4': weight_variable([4, 4, 4, ngf, ngf*2]),
-				'dh5': weight_variable([4, 4, 4, 3, ngf])
+				'dh1': weight_variable([2, 2, 2, ngf*8, ngf*8]),
+				'dh2': weight_variable([2, 2, 2, ngf*4, ngf*8]),
+				'dh3': weight_variable([2, 2, 2, ngf*2, ngf*4]),
+				'dh4': weight_variable([2, 2, 2, ngf, ngf*2]),
+				'dh5': weight_variable([2, 2, 2, 3, ngf])
 			}
 
 			self.b = {
@@ -226,37 +227,75 @@ class Generator(object):
 
 class Discriminator(object):
 
-	def __init__(self, name="d_"):
+	def __init__(self, ndf=21, name="d_"):
 		with tf.variable_scope(name):
 			self.name = name
+			self.ndf = ndf
 
 			self.W = {
-				'h1': weight_variable([4, 4, 4, 4, 16]),
-				'h2': weight_variable([4, 4, 4, 16, 32]),
-				'h3': weight_variable([4, 4, 4, 32, 64]),
-				'h4': weight_variable([4, 4, 4, 64, 128]),
-				'h5': weight_variable([2*2*2*128, 2]),
+				'h1': weight_variable([2, 2, 2, 4, ndf]),
+				'h2': weight_variable([2, 2, 2, ndf, ndf*2]),
+				'h3': weight_variable([2, 2, 2, ndf*2, ndf*4]),
+				'h4': weight_variable([2, 2, 2, ndf*4, ndf*8]),
+				'h5': weight_variable([2*2*2*ndf*8, 2])
 			}
 
 			self.b = {
-				'h1': bias_variable([16]),
-				'h5': bias_variable([2]),
+				'h1': bias_variable([ndf]),
+				'h5': bias_variable([2])
 			}
 
-			self.bn2 = BatchNormalization([32], 'bn2')
-			self.bn3 = BatchNormalization([64], 'bn3')
-			self.bn4 = BatchNormalization([128], 'bn4')
+			self.bn2 = BatchNormalization([ndf*2], 'bn2')
+			self.bn3 = BatchNormalization([ndf*4], 'bn3')
+			self.bn4 = BatchNormalization([ndf*8], 'bn4')
 
 	def __call__(self, x, train):
 		shape = x.get_shape().as_list()		
 		noisy_x = x + tf.random_normal(shape,mean=0.0,stddev=1)
 		
-		h = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])
-		h = lrelu(self.bn2(conv3d(h, self.W['h2']), train))
-		h = lrelu(self.bn3(conv3d(h, self.W['h3']), train))
-		h = lrelu(self.bn4(conv3d(h, self.W['h4']), train))
-		h = tf.reshape(h, [-1, 2*2*2*128])
+		h1 = lrelu(conv3d(noisy_x, self.W['h1']) + self.b['h1'])	#(n,16,16,16,f)
+		h2 = lrelu(self.bn2(conv3d(h1, self.W['h2']), train))		#(n,8,8,8,f*2)
+		h3 = lrelu(self.bn3(conv3d(h2, self.W['h3']), train))		#(n,4,4,4,f*4)
+		h4 = lrelu(self.bn4(conv3d(h3, self.W['h4']), train))		#(n,2,2,2,f*8)
+		h = tf.reshape(h4, [-1, 2*2*2*self.ndf*8])
 
 		y = tf.matmul(h, self.W['h5']) + self.b['h5']
 		return y
+
+#### test conv2.5d ####
+
+if __name__ == '__main__':
+	print "testing conv2.5d"
+	# rgba = tf.placeholder(tf.float32, [32, 32, 32, 32, 4])
+	# W = weight_variable([4, 4, 2, 4, 16])
+	# res = conv2_5d(rgba, W, axis=2, depth=4)
+	
+	# rgba = tf.placeholder(tf.float32, [32, 4, 4, 4, 15])
+	# W = weights_2_5_d([4,4,4,15,30])
+	# res = conv3d(rgba, W)
+	# print res
+
+	# with tf.Session() as sess:
+	# 	sess.run(tf.global_variables_initializer())
+	# 	data = np.zeros((32,1,4,4,1))
+	# 	data[0:16,:,2,:,:] = 0.7
+	# 	r1, r2 = sess.run([W, res], feed_dict={rgba:data})
+	# 	print r1
+	# 	print r2
+
+	batch_size = 32
+	z_size = 5
+	z = tf.placeholder(tf.float32, [batch_size, z_size])
+	a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
+	rgba = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 4])
+	train = tf.placeholder(tf.bool)
+	G = Generator(z_size)
+	D = Discriminator()
+
+	rgba_ = G(a, z, train)
+	y_ = D(rgba_, train)
+	y = D(rgba, train)
+
+
+
 
