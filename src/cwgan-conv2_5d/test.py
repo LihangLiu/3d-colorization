@@ -1,3 +1,6 @@
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
 import _init_paths
 import tensorflow as tf
 import numpy as np
@@ -7,6 +10,43 @@ import time
 import os
 
 import config as myconfig
+
+def rescaleKernel(vox):
+    vox = np.abs(vox)
+    max_value = np.amax(vox)
+    vox = vox/max_value
+    return vox    
+
+def getPoints(vox):
+## xs: (n,1)
+## rbgs: (n,1)
+    xs,ys,zs = np.nonzero(vox)
+    r = vox[xs,ys,zs]
+    r = np.expand_dims(r,axis=1)
+    rgbs = np.concatenate([r,r,r],axis=1)
+    return xs,ys,zs,rgbs
+
+def pltKernel(vox):
+    start = time.time()
+    print vox.shape
+    # draw 
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.set_aspect("equal")
+    dim = vox.shape[0]
+    ax.set_xlim(0, dim)
+    ax.set_ylim(0, dim)
+    ax.set_zlim(0, dim)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    vox = rescaleKernel(vox)
+    xs,ys,zs,rgbs = getPoints(vox)
+    ax.scatter(xs,ys, zs, color=rgbs) #, s=5)
+    print "total points:",xs.shape[0]
+
+    print 'time:', time.time()-start
+    plt.show()
 
 def prepare_batch_dict(data_dict):
     batch_voxels = data_dict['rgba']        # (n,32,32,32,4)
@@ -78,7 +118,7 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-model_path = "../../outputs/params/params73_250.ckpt"
+model_path = "../../outputs/params/params74_400.ckpt"
 saver.restore(sess, model_path)
 
 # fetch variables
@@ -89,14 +129,18 @@ fetches_G = sess.run(loss_G, feed_dict=feed_dict)
 W = sess.run(G.W, feed_dict=feed_dict)
 print 'G h3'
 print W['h3'][:,:,:,5,7]
+pltKernel(W['h3'][:,:,:,5,7])
 print 'G dh3'
 print W['dh3'][:,:,:,5,7]
+pltKernel(W['dh3'][:,:,:,5,7])
 print 'G dh5'
 print W['dh3'][:,:,:,1,3]
+pltKernel(W['dh3'][:,:,:,1,3])
 
 W = sess.run(D.W, feed_dict=feed_dict)
 print 'd h3'
 print W['h3'][:,:,:,5,7]
+pltKernel(W['h3'][:,:,:,5,7])
 
 for v in tf.trainable_variables():
 	if 'alpha' in v.name:
