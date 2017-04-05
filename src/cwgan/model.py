@@ -150,7 +150,7 @@ def vbn(x, name):
 ### 
 class Generator(object):
 
-	def __init__(self, z_size=5, ngf=12, name="g_"):
+	def __init__(self, z_size=5, ngf=9, name="g_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ngf = ngf
@@ -158,17 +158,17 @@ class Generator(object):
 			self.W = {
 				'hz': weight_variable([z_size, 32*32*32*1]),
 
-				'h1': weight_variable([2, 2, 2, 2, ngf]),
-				'h2': weight_variable([2, 2, 2, ngf, ngf*2]),
-				'h3': weight_variable([2, 2, 2, ngf*2, ngf*4]),
-				'h4': weight_variable([2, 2, 2, ngf*4, ngf*8]),
-				'h5': weight_variable([2, 2, 2, ngf*8, ngf*8]),
+				'h1': weight_variable([3, 3, 3, 2, ngf]),
+				'h2': weight_variable([3, 3, 3, ngf, ngf*2]),
+				'h3': weight_variable([3, 3, 3, ngf*2, ngf*4]),
+				'h4': weight_variable([3, 3, 3, ngf*4, ngf*8]),
+				'h5': weight_variable([3, 3, 3, ngf*8, ngf*8]),
 
-				'dh1': weight_variable([2, 2, 2, ngf*8, ngf*8]),
-				'dh2': weight_variable([2, 2, 2, ngf*4, ngf*8]),
-				'dh3': weight_variable([2, 2, 2, ngf*2, ngf*4]),
-				'dh4': weight_variable([2, 2, 2, ngf, ngf*2]),
-				'dh5': weight_variable([2, 2, 2, 3, ngf])
+				'dh1': weight_variable([3, 3, 3, ngf*8, ngf*8]),
+				'dh2': weight_variable([3, 3, 3, ngf*4, ngf*8]),
+				'dh3': weight_variable([3, 3, 3, ngf*2, ngf*4]),
+				'dh4': weight_variable([3, 3, 3, ngf, ngf*2]),
+				'dh5': weight_variable([3, 3, 3, 3, ngf])
 			}
 
 			self.b = {
@@ -227,16 +227,16 @@ class Generator(object):
 
 class Discriminator(object):
 
-	def __init__(self, ndf=21, name="d_"):
+	def __init__(self, ndf=15, name="d_"):
 		with tf.variable_scope(name):
 			self.name = name
 			self.ndf = ndf
 
 			self.W = {
-				'h1': weight_variable([2, 2, 2, 4, ndf]),
-				'h2': weight_variable([2, 2, 2, ndf, ndf*2]),
-				'h3': weight_variable([2, 2, 2, ndf*2, ndf*4]),
-				'h4': weight_variable([2, 2, 2, ndf*4, ndf*8]),
+				'h1': weight_variable([3, 3, 3, 4, ndf]),
+				'h2': weight_variable([3, 3, 3, ndf, ndf*2]),
+				'h3': weight_variable([3, 3, 3, ndf*2, ndf*4]),
+				'h4': weight_variable([3, 3, 3, ndf*4, ndf*8]),
 				'h5': weight_variable([2*2*2*ndf*8, 2])
 			}
 
@@ -295,6 +295,7 @@ if __name__ == '__main__':
 	rgba_ = G(a, z, train)
 	y_ = D(rgba_, train)
 	y = D(rgba, train)
+
 
 
 

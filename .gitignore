@@ -5,3 +5,4 @@ data/*
 */*.pyc
 **/condor_submit
 **/run*.sh
+**/tmp
