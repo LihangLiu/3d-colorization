@@ -12,7 +12,6 @@ Requirements=(TARGET.GPUSlot) && (TARGET.MACHINE=="eldar-11.cs.utexas.edu" \\
              || TARGET.MACHINE=="eldar-13.cs.utexas.edu" \\
              || TARGET.MACHINE=="eldar-14.cs.utexas.edu" \\
              || TARGET.MACHINE=="eldar-15.cs.utexas.edu" \\
-             || TARGET.MACHINE=="eldar-16.cs.utexas.edu" \\
              || TARGET.MACHINE=="eldar-17.cs.utexas.edu" \\
              || TARGET.MACHINE=="eldar-18.cs.utexas.edu" \\
              || TARGET.MACHINE=="eldar-19.cs.utexas.edu" \\
