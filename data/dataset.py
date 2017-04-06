@@ -5,29 +5,31 @@ import os
 import random
 import time
 
-import config
-
-Datasets = collections.namedtuple('Datasets', ['train'])
 
 class Dataset:
 
-	def __init__(self):
+	def __init__(self, dataset_path):
 		self.name = "real, not jittered"
 		print "dataset is ", self.name
-		print config.dataset_path
+		print dataset_path
 
 		self.index_in_epoch = 0
-		self.examples = np.array(self.read_txt(config.dataset_path))
+		self.examples = np.array(self.read_txt(dataset_path))
 		self.num_examples = len(self.examples)
+		print 'dataset size: ', self.num_examples
 		np.random.shuffle(self.examples)
 
 	def read_txt(self, txtFile):
 		txtDir = os.path.dirname(txtFile)
 		obj_path_list = []
-		for obj_path in open(txtFile, 'r'):
-			obj_path = obj_path.strip()
+		for line in open(txtFile, 'r'):		# obj_path [syn_id] -> (obj_path,syn_id=-1)
+			line = line.strip().split()
+			syn_id = '-1'
+			if len(line) == 2:
+				syn_id = line[1]
+			obj_path = line[0]
 			obj_path = os.path.join(txtDir, obj_path)
-			obj_path_list.append(obj_path)
+			obj_path_list.append((obj_path, syn_id))
 		return obj_path_list
 
 	def next_batch(self, batch_size):
@@ -45,22 +47,24 @@ class Dataset:
 
 	def read_data(self, start, end):
 		# 
-		batch = {'rgba':[]}
+		batch = {'rgba':[], 'syn_id':[]}
 		#s = time.time()
-		for fname in self.examples[start:end]:
+		for fname, syn_id in self.examples[start:end]:
 			if '64.points.npy' in fname:
 				points = np.load(fname)
 				vox = points2vox(points,64)
 			elif '32.points.npy' in fname:
-                                points = np.load(fname)
-                                vox = points2vox(points,32)
+				points = np.load(fname)
+				vox = points2vox(points,32)
 			else:
 				vox = np.load(fname)
 			#vox = voxJitter(vox)
 			data = transformTo(vox)
 			batch['rgba'].append(data['rgba'])
+			batch['syn_id'].append(int(syn_id))
 		#print 'time ', time.time()-s
 		batch['rgba'] = np.array(batch['rgba'])
+		batch['syn_id'] = np.array(batch['syn_id'])
 		return batch
 
 
@@ -89,14 +93,14 @@ def points2vox(points,N):
 #       (n,1) -> y
 #       (n,2) -> z
 #       (n,3:6) -> rgb
-        xs = points[:,0].astype(int)
-        ys = points[:,1].astype(int)
-        zs = points[:,2].astype(int)
-        rgb = points[:,3:6]
-        vox = np.zeros((N,N,N,4))
-        vox[xs,ys,zs,0:3] = rgb
-        vox[xs,ys,zs,3] = 1
-        return vox
+	xs = points[:,0].astype(int)
+	ys = points[:,1].astype(int)
+	zs = points[:,2].astype(int)
+	rgb = points[:,3:6]
+	vox = np.zeros((N,N,N,4))
+	vox[xs,ys,zs,0:3] = rgb
+	vox[xs,ys,zs,3] = 1
+	return vox
 
 ######### voxel jitter #########
 
@@ -176,11 +180,5 @@ def voxJitter(vox):
 	#vox = rotateVox(vox, sampleRotate())
 	return vox
 
-
-#########  Main  #########
-
-def read():
-	train = Dataset()
-	return Datasets(train=train)
 
 
