@@ -6,6 +6,7 @@ import sys
 import os
 import numpy as np
 import tinyobjloader as tol
+import time
 
 def getPoints(vox):
 ## xs: (n,1)
@@ -30,6 +31,7 @@ def obj2points(filename, N, C):
 
 if __name__ == '__main__':
 	# load obj file and convert to points
+	s = time.time()
 	N = int(sys.argv[1])
 	filename = os.path.abspath(sys.argv[2])
 	C = 4
@@ -38,6 +40,8 @@ if __name__ == '__main__':
 	# save to npy file
 	npy_path = sys.argv[3]
 	np.save(npy_path, points)
+
+	print "time: ", time.time()-s
 
 
 
