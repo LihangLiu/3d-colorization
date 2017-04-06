@@ -333,6 +333,7 @@ epoch 72:**
 	    
 epoch 73:
         72: cwgan + conv2.5d
+            D=0.02, exp(-alpha*d^2), init alpha=1.0
             D=0.02, exp(-alpha*(d)^2), init alpha=1.0
             D: h1-h4, xyz project
             G: h1-h5, dh1-dh5, xyz project
@@ -393,6 +394,12 @@ epoch 1004:
 epoch 1005:
 	1004: cwgan + conv2_5d
             D=0.02, exp(-0.1*alpha*d^2), init alpha=0.1
+
+-- clip on alpha --
+
+epoch 1006:
+	1002: cwgan + conv2_5d
+            D=0.02, exp(-10*alpha*(d)^2), init alpha=0.01, clip
 
 
 
