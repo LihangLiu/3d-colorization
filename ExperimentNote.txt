@@ -402,4 +402,13 @@ epoch 1006:
             D=0.02, exp(-10*alpha*(d)^2), init alpha=0.01, clip
 
 
+# # # # # # # # # # # #
+# classification on (64,64,64,4)
+# # # # # # # # # # # #
+
+epoch 2001:
+	shapenets
+
+
+
 
