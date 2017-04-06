@@ -43,7 +43,7 @@ def pltVox(voxname):
 	ax.set_zlabel('Z')
 
 	xs,ys,zs,rgbs = getPoints(vox)
-	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs, s=5)
+	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs) #, s=5)
 
 	print 'time:', time.time()-start
 	plt.show()

@@ -19,7 +19,7 @@ for obj_path in $obj_paths; do
 #		echo "converting ..."
 #		python $py_dir/obj2vox.py $obj_name $obj_name.npy
 #	fi
-	python $py_dir/obj2points.py 32  $obj_name $obj_name.32.points.npy
-	chmod 755 $obj_name.npy
+	python $py_dir/obj2points.py 64  $obj_name $obj_name.64.points.npy
+	chmod 755 $obj_name.64.points.npy
 done
 

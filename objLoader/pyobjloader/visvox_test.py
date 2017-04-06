@@ -56,7 +56,7 @@ def pltVox(vox):
 	ax.set_ylim(0, dim)
 	ax.set_zlim(0, dim)
 	xs,ys,zs,rgbs = getPoints(vox)
-	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs) #, s=5)
+	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs, s=5)
 	print "total points:",xs.shape[0]
 
 	print 'time:', time.time()-start
@@ -68,22 +68,13 @@ if __name__ == '__main__':
 	# load .npy file
 	vox = np.load(voxname)
 
-	# test loading speed
-	start = time.time()
-	for i in range(32):
-		s = time.time()
-		vox = np.load(voxname)
-		print time.time()-s
-	print time.time()-start
-	exit(0)
-
 	# downsample
 	#vox = downsample(vox)
-	#vox = maxpooling(vox)
+	vox = maxpooling(vox)
 	# vox = patch(vox)
 
 	pltVox(vox)
-	pltPatches(vox)
+	#pltPatches(vox)
 
 
 
