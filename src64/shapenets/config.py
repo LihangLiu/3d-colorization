@@ -6,4 +6,6 @@ ITER_MAX = 501
 loss_csv = "../../outputs/losses/loss_%d.csv"%(version)
 vox_prefix = "../../outputs/voxels/epoch%d_"%(version)
 param_prefix = "../../outputs/params/params%d_"%(version)
+log_txt = "../../outputs/log/log_%d.txt"%(version)
+
 

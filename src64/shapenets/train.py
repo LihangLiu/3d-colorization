@@ -11,8 +11,10 @@ import config as myconfig
 def prepare_batch_dict(data_dict):
     batch_voxels = data_dict['rgba']        # (n,64,64,64,4)
     batch_syn_id = data_dict['syn_id']      # (n,)
+    #print batch_syn_id
     batch_label = np.zeros([batch_size, num_syn], dtype=np.float32) # (n,55)
     batch_label[np.array(range(0,batch_size)), batch_syn_id] = 1
+    #print batch_label
     batch_dict = {'rgba':batch_voxels, 'label': batch_label}
     return batch_dict
 
@@ -57,7 +59,6 @@ config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
     sess.run(tf.global_variables_initializer())
     total_batch = train_data.num_examples / batch_size
-    gen_iterations = 0
     # running
     for epoch in xrange(0, myconfig.ITER_MAX):  
         loss_list = {'loss_D':[], 'train_accuracy':[], 'test_accuracy':[]}
@@ -65,13 +66,18 @@ with tf.Session(config=config) as sess:
         for i in xrange(total_batch): 
             batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
             feed_dict = prepare_feed_dict(batch_dict, rgba, label, train,True)
-            sess.run(opt_D, feed_dict=feed_dict)
 
             # evaluate
             train_loss_D,train_accuracy = sess.run([loss_D,accuracy], feed_dict=feed_dict)
             loss_list['loss_D'].append(train_loss_D)
             loss_list['train_accuracy'].append(train_accuracy)
-            print epoch, i, train_loss_D, train_accuracy
+            with open(myconfig.log_txt, 'a') as f:
+                msg = "%d %d %.6f %.6f\n"% (epoch, i, train_loss_D, train_accuracy)
+                print msg
+                f.write(msg)
+
+            # train
+            sess.run(opt_D, feed_dict=feed_dict)
 
         ### test on one epoch ### 
         for i in xrange(test_data.num_examples/batch_size):
@@ -91,7 +97,6 @@ with tf.Session(config=config) as sess:
 
         if epoch % save_interval == 0:
             saver.save(sess, myconfig.param_prefix+"{0}.ckpt".format(epoch))
-
 
 
 
