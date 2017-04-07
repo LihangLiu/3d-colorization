@@ -409,6 +409,8 @@ epoch 1006:
 epoch 2001:
 	shapenets
 
-
+epoch 2002:
+	shapenets + conv2_5d
+	D=0.02, exp(-alpha*(d)^2), init alpha=0.1
 
 
