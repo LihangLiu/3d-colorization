@@ -413,4 +413,25 @@ epoch 2002:
 	shapenets + conv2_5d
 	D=0.02, exp(-alpha*(d)^2), init alpha=0.1
 
+epoch 2003:
+        shapenets + conv2_5d
+        D=0.02, exp(-0.1*alpha*(d)^2), init alpha=0.1
+
+epoch 2004:
+	shapenets + conv2_5d
+        D=0.02, exp(-0.1*alpha*(d)^2), init alpha stddev=0.1
+
+epoch 2005:
+	shapenets + conv2_5d
+	D=0.02, exp(-0.1*alpha*(d)^2), init alpha=0.1
+	h1-h3	
+
+epoch 2006:
+	shapenets + conv2_5d
+	D=0.02, exp(-0.1*alpha*(d)^2), init alpha=0.1
+	h1
+
+
+
+
 
