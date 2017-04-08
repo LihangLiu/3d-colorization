@@ -28,7 +28,7 @@ test_data = dataset.Dataset(myconfig.test_dataset_path)
 batch_size = 32
 learning_rate = 0.0001
 beta1 = 0.5
-save_interval = 100
+save_interval = myconfig.save_interval
 num_syn = 55
 
 ###  input variables
@@ -58,9 +58,11 @@ config.gpu_options.allow_growth = True
 
 with tf.Session(config=config) as sess:
     sess.run(tf.global_variables_initializer())
+    if myconfig.preload_mode:
+        saver.restore(sess, myconfig.preload_mode)
     total_batch = train_data.num_examples / batch_size
     # running
-    for epoch in xrange(0, myconfig.ITER_MAX):  
+    for epoch in xrange(myconfig.ITER_MIN, myconfig.ITER_MAX):  
         loss_list = {'loss_D':[], 'train_accuracy':[], 'test_accuracy':[]}
         ### train on one epoch ### 
         for i in xrange(total_batch): 
@@ -71,10 +73,11 @@ with tf.Session(config=config) as sess:
             train_loss_D,train_accuracy = sess.run([loss_D,accuracy], feed_dict=feed_dict)
             loss_list['loss_D'].append(train_loss_D)
             loss_list['train_accuracy'].append(train_accuracy)
-            with open(myconfig.log_txt, 'a') as f:
-                msg = "%d %d %.6f %.6f\n"% (epoch, i, train_loss_D, train_accuracy)
-                print msg
-                f.write(msg)
+            if i%10 == 0:
+                with open(myconfig.log_txt, 'a') as f:
+                    msg = "%d %d %.6f %.6f\n"% (epoch, i, train_loss_D, train_accuracy)
+                    print msg
+                    f.write(msg)
 
             # train
             sess.run(opt_D, feed_dict=feed_dict)
