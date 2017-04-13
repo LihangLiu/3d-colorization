@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
 import numpy as np
+from scipy.misc import imread
 from os.path import dirname
 import os
 import sys
@@ -24,6 +25,16 @@ def getPoints(vox):
 	rgbs = vox[xs,ys,zs,0:3]
 	return xs,ys,zs,rgbs
 
+def concatenateImages(imname_list,out_imname):
+	N = len(imname_list)
+	W = 4
+	H = int((N-1)/W)+1
+	for i,imname in enumerate(imname_list):
+		plt.subplot(H, W, i+1)
+		img = imread(imname)
+		plt.imshow(img)
+	plt.savefig(out_imname,dpi=1000)
+	
 
 def vox2image(voxname,imname):
 	start = time.time()
@@ -46,6 +57,11 @@ def vox2image(voxname,imname):
 	
 
 if __name__ == '__main__':
+	# test
+	#im_list = ["tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg","tmp/test1.jpg"]
+	#concatenateImages(im_list, "tmp/test.jpg")	
+	#exit(0)
+
 	voxname = os.path.abspath(sys.argv[1])
 	imname = os.path.abspath(sys.argv[2])
 
