@@ -6,7 +6,7 @@ version = 3002
 ITER_MIN = 1
 ITER_MAX = 501
 save_interval = 10
-pca_path = "pca_vectors.npy"
+pca_path = train_dataset_path+".pca_vectors.npy"
 preload_model = ""
 # preload_model = "../../outputs/params/params%d_%d.ckpt"%(version,ITER_MIN)
 

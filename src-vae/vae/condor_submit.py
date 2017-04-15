@@ -60,6 +60,7 @@ print 'condor_submit generated'
 with open(Executable_file, 'w') as f:
 	f.write("""#!/bin/bash
 python train.py
+
 """)
 print Executable_file, 'generated'
 os.system('chmod 755 %s'%(Executable_file))

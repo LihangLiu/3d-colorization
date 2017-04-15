@@ -16,7 +16,7 @@ txt_path = sys.argv[1]
 examples = np.array(read_txt(txt_path))
 #examples = examples[1:100]
 batch_size = len(examples)
-z_size = 20
+z_size = 5
 batch = {'rgba':[]}
 
 for fname in examples:
@@ -38,7 +38,7 @@ batch['rgba'] = np.array(batch['rgba'])
 real_images = batch['rgba']
 
 #flattened_images = tf.Variable([0.0])
-place = tf.placeholder(tf.float32, shape=(batch_size, 64, 64, 64, 4))
+place = tf.placeholder(tf.float32, shape=(batch_size, 32, 32, 32, 4))
 #set_x = flattened_images.assign(place)
 flattened_images = tf.Variable(place)
 sess = tf.Session()
@@ -57,6 +57,6 @@ topkv_ori = tf.matmul(topkv, flattened_images)
 proj_images = tf.matmul(flattened_images, tf.transpose(topkv_ori))
 root_n = tf.constant(np.sqrt(batch_size),'float32')
 proj_images = tf.scalar_mul(root_n,tf.nn.l2_normalize(proj_images, 0, epsilon=1e-12, name=None))
-np.save(txt_path+'.pca_vectors.npy', sess.run(proj_images))
+np.save(txt_path+'.pca_vectors.z5.npy', sess.run(proj_images))
 print "success"
 

@@ -25,6 +25,16 @@ def prepare_feed_dict(batch_dict, rgb, a, index, train, flag):
 	fetch_dict = {rgb:batch_dict['rgb'], a:batch_dict['a'],index:batch_dict['index'], train:flag}
 	return fetch_dict
 
+def prepare_fix_shape_feed_dict(batch_dict, rgb, a, index, train, flag):
+	batch_rgb = np.array(batch_dict['rgb'])
+	batch_index = np.array(batch_dict['index'])
+	# shuffle index and rgb
+	c = list(zip(batch_rgb, batch_index))
+	np.random.shuffle(c)
+	batch_rgb, batch_index = zip(*c)
+	fetch_dict = {rgb:np.array(batch_rgb), a:batch_dict['a'],index:np.array(batch_index), train:flag}
+	return fetch_dict
+
 train_data = dataset.Dataset(myconfig.train_dataset_path)
 test_data = dataset.Dataset(myconfig.test_dataset_path)
 
@@ -39,7 +49,7 @@ if __name__ == '__main__':
 	beta1 = 0.5
 	z_size = 20
 	save_interval = 100
-	sample_interval = myconfig.save_interval
+	sample_interval = 10
 	total_batch = num_train / batch_size
 
 
@@ -61,11 +71,6 @@ if __name__ == '__main__':
 	loss_G = tf.reduce_mean(tf.abs(rgb-rgb_))
 	var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 	opt_G = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_G, var_list=var_G)
-	
-	# fix shape graph
-	rgb_fix_shape, rgba_fix_shape = G.fix_shape(a, indexes, all_z, train)
-	loss_G_fix_shape = tf.reduce_mean(tf.abs(tf.tile(rgb,[batch_size,1,1,1,1])-rgb_fix_shape))
-	opt_G_fix_shape = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss_G_fix_shape, var_list=var_G, name='sgd2')
 
 	# sample graph
 	sample_rgb_, sample_rgba_ = G.sample(a, z, train)
@@ -110,15 +115,16 @@ if __name__ == '__main__':
 		for epoch in xrange(myconfig.ITER_MIN, myconfig.ITER_MAX):
 			loss_dict = {'G':[]}
 			for i in xrange(total_batch):
-				# update Generator
 				# read batch data
 				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
+				# update Generator
 				feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,True)
 				sess.run(opt_G, feed_dict=feed_dict)
 
 				# update fix shape regularization
-				if epoch%3 == -1:
-					sess.run(opt_G_fix_shape, feed_dict=feed_dict)
+				# if epoch%3 == -1:
+				# feed_dict = prepare_fix_shape_feed_dict(batch_dict, rgb, a, indexes, train,True)
+				# sess.run(opt_G, feed_dict=feed_dict)
 
 				with open(myconfig.log_txt, 'a') as f:
 					feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,False)
@@ -149,7 +155,7 @@ if __name__ == '__main__':
 				for name in sub_names:
 					os.remove(name)
 
-			if epoch % 2 == 0:
+			if epoch % sample_interval == 0:
 				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
 
 				# save ground-truth

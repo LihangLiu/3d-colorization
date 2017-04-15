@@ -6,11 +6,10 @@ def weight_variable(name, shape):
 	return tf.get_variable(name, shape, tf.float32, tf.random_normal_initializer(stddev = 0.02))
 
 def bias_variable(name, shape):
-	return tf.Variable(tf.constant(0.1, shape=shape))
 	return tf.get_variable(name, shape, initializer=tf.constant_initializer(0.1)),
 
 def addRandomNormal(x):
-	return x + tf.random_normal(x.get_shape().as_list())
+	return x + tf.random_normal(x.get_shape().as_list(),stddev=1.0)
 
 def conv3d(x, W, stride=2):
 	return tf.nn.conv3d(x, W, strides=[1, stride, stride, stride, 1], padding='SAME')
@@ -64,8 +63,8 @@ class Generator(object):
 			}
 
 			self.b = {
-				'h1': bias_variable('h1', [ngf]),
-				'dh5': bias_variable('dh5', [3]),
+				'h1': bias_variable('bias-h1', [ngf]),
+				'dh5': bias_variable('bias-dh5', [3]),
 			}
 
 			self.bn2 = batch_norm(name = 'bn2')
@@ -121,14 +120,14 @@ class Generator(object):
 		assert tf.get_variable_scope().reuse == False
 		return self.__call__(a, random_z, train)
 
-	def fix_shape(self, a, indexes, all_z, train):
-		assert tf.get_variable_scope().reuse == False
-		N = indexes.get_shape().as_list()[0]
-		rep_index = tf.reshape(tf.transpose(tf.reshape(tf.tile(indexes,[N]), (N,-1))),(-1,))
-		rep_a = tf.gather(a, rep_index)
-		z = tf.gather(all_z, indexes)		
-		rep_z = tf.tile(z, [N,1]) 
-		return self.__call__(rep_a, rep_z, train)
+	# def fix_shape(self, a, indexes, all_z, train):
+	# 	assert tf.get_variable_scope().reuse == False
+	# 	N = indexes.get_shape().as_list()[0]
+	# 	rep_index = tf.reshape(tf.transpose(tf.reshape(tf.tile(indexes,[N]), (N,-1))),(-1,))
+	# 	rep_a = tf.gather(a, rep_index)
+	# 	z = tf.gather(all_z, indexes)		
+	# 	rep_z = tf.tile(z, [N,1]) 
+	# 	return self.__call__(rep_a, rep_z, train)
 
 
 def mask(rgb, a):

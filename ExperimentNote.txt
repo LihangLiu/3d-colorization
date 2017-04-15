@@ -446,9 +446,21 @@ epoch 3001:
 	l1 loss on rgb
 	(32,)
 
+-- (64,)
+
 epoch 3002:
-	l1 loss on rgb
-	(64,)
+	l1 loss
 
+epoch 3003:
+	3002: l1 loss
+		noise stddev=0.1 <- 1.0
 
+epoch 3004:
+	3003: l1 loss + fix_shape
+		noise stddev=0.1 
+
+epoch 3005:
+	3002: l1 loss
+		noise stddev=1
+		z_size = 5 <- 20
 
