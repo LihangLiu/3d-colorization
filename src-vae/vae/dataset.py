@@ -23,7 +23,7 @@ class Dataset:
 		print dataset_path
 
 		self.index_in_epoch = 0
-		self.examples = np.array(self.read_txt(dataset_path))[:1000]
+		self.examples = np.array(self.read_txt(dataset_path))
 		self.num_examples = len(self.examples)
 		print 'total size: ', self.num_examples
 		self.shuffle_index = range(0, len(self.examples))
@@ -55,12 +55,10 @@ class Dataset:
 			assert batch_size <= self.num_examples
 
 		end = self.index_in_epoch
-		return self.shuffle_index[start:end], self.read_data(start, end)
+		return self.read_data(start, end)
 
 	def read_data(self, start, end):
-		# 
 		batch = {'rgba':[]}
-
 		for fname in self.examples[start:end]:
 			if '64.points.npy' in fname:
 				points = np.load(fname)
@@ -70,31 +68,42 @@ class Dataset:
 				vox = points2vox(points,32)
 			else:
 				vox = np.load(fname)
-			data = transformTo(vox)
-			batch['rgba'].append(data['rgba'])
+			vox = transformTo(vox)
+			batch['rgba'].append(vox)
 
 		batch['rgba'] = np.array(batch['rgba'])
+		batch['index'] = np.array(self.shuffle_index[start:end])
 		return batch
 
 # from dataset to network
 # (0,1) -> (-1,1)
+# input: voxel or batch_voxel
 def transformTo(vox):
-	vox = (vox-0.5)*2
+	new_vox = np.array(vox)
+	shape = new_vox.shape
+	assert len(shape)==4 or len(shape)==5
+	assert shape[-1] == 4
 
-	data = {'rgba':vox}
-	return data
+	new_vox = (new_vox-0.5)*2
+
+	return new_vox
 
 # from network to dataset
 # rgb: (-1,1) -> (0,1)
 # a:   (-1,0) -> 0; (0,1) -> 1
+# input: voxel or batch_voxel
 def transformBack(vox):
-	if vox.shape[3] == 4: # rgba
-		vox[:,:,:,3] = (vox[:,:,:,3]>0)
-		vox[:,:,:,0:3] = vox[:,:,:,0:3]*0.5+0.5
-	elif vox.shape[3] == 1:
-		vox = vox > 0
-	return vox
-
+	new_vox = np.array(vox)
+	shape = new_vox.shape
+	assert len(shape)==4 or len(shape)==5
+	assert shape[-1] == 4
+	if len(shape)==4:
+		new_vox[:,:,:,3] = (new_vox[:,:,:,3]>0)
+		new_vox[:,:,:,0:3] = new_vox[:,:,:,0:3]*0.5+0.5
+	else:
+		new_vox[:,:,:,:,3] = (new_vox[:,:,:,:,3]>0)
+		new_vox[:,:,:,:,0:3] = new_vox[:,:,:,:,0:3]*0.5+0.5
+	return new_vox
 
 def points2vox(points,N):
 # points: (n,5)

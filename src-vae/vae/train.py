@@ -12,21 +12,30 @@ import matplotlib.pyplot as plt
 
 import config as myconfig
 
+# 
+def prepare_batch_dict(data_dict):
+	batch_rgba = data_dict['rgba'] 
+	batch_rgb = batch_rgba[:,:,:,:,0:3]		# (n,64,64,64,3)
+	batch_a = batch_rgba[:,:,:,:,3:4]		# (n,64,64,64,1)
+	batch_index = data_dict['index']
+	batch_dict = {'rgba':batch_rgba, 'rgb':batch_rgb, 'a':batch_a, 'index':batch_index}
+	return batch_dict
+
+def prepare_feed_dict(batch_dict, rgb, a, index, train, flag):
+	fetch_dict = {rgb:batch_dict['rgb'], a:batch_dict['a'],index:batch_dict['index'], train:flag}
+	return fetch_dict
 
 train_data = dataset.Dataset(myconfig.train_dataset_path)
 test_data = dataset.Dataset(myconfig.test_dataset_path)
 
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-with tf.Session(config=config) as sess:
-
+if __name__ == '__main__':
 
 	##################################################
 	## set parameter
 	##################################################
 	batch_size = 32 # for 
 	num_train = train_data.num_examples
-	learning_rate = 0.0001*200
+	learning_rate = 0.0001*100
 	beta1 = 0.5
 	z_size = 20
 	save_interval = 100
@@ -37,8 +46,8 @@ with tf.Session(config=config) as sess:
 	##################################################.
 	## build graph
 	##################################################
-	a = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 1])
-	rgb = tf.placeholder(tf.float32, [batch_size, 32, 32, 32, 3])
+	a = tf.placeholder(tf.float32, [batch_size, 64, 64, 64, 1])
+	rgb = tf.placeholder(tf.float32, [batch_size, 64, 64, 64, 3])
 	train = tf.placeholder(tf.bool)
 	indexes = tf.placeholder(tf.int32, [batch_size,])
 	with tf.variable_scope('G_z'):
@@ -46,138 +55,128 @@ with tf.Session(config=config) as sess:
 
 	z = tf.placeholder(tf.float32, [batch_size, z_size])
 
-	# generator
+	# train graph
 	G = model.Generator(z_size)
-	rgb_ = G(a, indexes, all_z, train)
-
+	rgb_, rgba_ = G.train(a, indexes, all_z, train)
 	loss_G = tf.reduce_mean(tf.abs(rgb-rgb_))
 	var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 	opt_G = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_G, var_list=var_G)
 	
-	# fix shape regularization
-	rgb_fix_shape = G.fix_shape(a, indexes, all_z, train)
-
+	# fix shape graph
+	rgb_fix_shape, rgba_fix_shape = G.fix_shape(a, indexes, all_z, train)
 	loss_G_fix_shape = tf.reduce_mean(tf.abs(tf.tile(rgb,[batch_size,1,1,1,1])-rgb_fix_shape))
 	opt_G_fix_shape = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss_G_fix_shape, var_list=var_G, name='sgd2')
 
-	# test
-	sampler = G.sampler(a, z, train)
+	# sample graph
+	sample_rgb_, sample_rgba_ = G.sample(a, z, train)
 
 	print 'var_G'
 	for v in var_G:
 		print v
 
-	##################################################
-	## Initialize variables
-	##################################################
-	sess.run(tf.global_variables_initializer())
+	config = tf.ConfigProto()
+	config.gpu_options.allow_growth = True
+	with tf.Session(config=config) as sess:
+		##################################################
+		## Initialize variables
+		##################################################
+		sess.run(tf.global_variables_initializer())
 
-	##################################################
-	## sample z values according to prior distribution
-	## and assign those z to each ground truth image
-	## via PCA
-	##################################################
-	proj_images = np.load(myconfig.pca_path)[:1000]
-	costM = model.pdist2(all_z, proj_images).eval()
-	assignment = lapjv.lapjv(costM)[2] # get colum assignment
-	buffer_batch_z = (tf.gather(all_z, assignment)).eval()
-	assign_z = all_z.assign(buffer_batch_z)
-	del(buffer_batch_z)
-	sess.run(assign_z)
-	print("Finished the pre-ordering of the z batches")
+		##################################################
+		## sample z values according to prior distribution
+		## and assign those z to each ground truth image
+		## via PCA
+		##################################################
+		proj_images = np.load(myconfig.pca_path)
+		costM = model.pdist2(all_z, proj_images).eval()
+		assignment = lapjv.lapjv(costM)[2] # get colum assignment
+		buffer_batch_z = (tf.gather(all_z, assignment)).eval()
+		assign_z = all_z.assign(buffer_batch_z)
+		del(buffer_batch_z)
+		sess.run(assign_z)
+		print("Finished the pre-ordering of the z batches")
 
-	saver = tf.train.Saver()
-	if myconfig.preload_model:
-		print 'load model: ', myconfig.preload_model
-		saver.restore(sess, myconfig.preload_model)
-	for epoch in xrange(myconfig.ITER_MIN, myconfig.ITER_MAX):
-		loss_dict = {'G':[]}
-		for i in xrange(total_batch):
-			# update Generator
-			# read batch data
-			indexes_, real_images = train_data.next_batch(batch_size)
-			real_images = real_images['rgba'].astype(np.float32)
+		##################################################
+		## check preload model
+		##################################################
+		saver = tf.train.Saver()
+		if myconfig.preload_model:
+			print 'load model: ', myconfig.preload_model
+			saver.restore(sess, myconfig.preload_model)
+
+		##################################################
+		## train
+		##################################################
+		for epoch in xrange(myconfig.ITER_MIN, myconfig.ITER_MAX):
+			loss_dict = {'G':[]}
+			for i in xrange(total_batch):
+				# update Generator
+				# read batch data
+				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
+				feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,True)
+				sess.run(opt_G, feed_dict=feed_dict)
+
+				# update fix shape regularization
+				if epoch%3 == -1:
+					sess.run(opt_G_fix_shape, feed_dict=feed_dict)
+
+				with open(myconfig.log_txt, 'a') as f:
+					feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,False)
+					batch_loss_G = loss_G.eval(feed_dict)
+					loss_dict['G'].append(batch_loss_G)
+					msg = "{0}, {1}, {2:.8f}".format(epoch, i, batch_loss_G)
+					print >> f, msg
+					print msg
+
+			with open(myconfig.loss_csv, 'a') as f:
+				loss_G_mean = np.mean(loss_dict['G'])
+				f.write("{0}, {1:.8f}\n".format(epoch, loss_G_mean))
+
+
+			##################################################
+			## draw samples on train and test dataset
+			## 
+			##################################################
+			def saveConcatVoxes2image(voxes, imname):
+				sub_names = []
+				for i,vox in enumerate(voxes): 
+					# print i,vox
+					sub_name = "tmp/tmp-%d.jpg"%(i)
+					dataset.vox2image(vox, sub_name)
+					sub_names.append(sub_name)
+				dataset.concatenateImages(sub_names, imname)
+				print imname
+				for name in sub_names:
+					os.remove(name)
+
+			if epoch % 2 == 0:
+				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
+
+				# save ground-truth
+				saveConcatVoxes2image(dataset.transformBack(np.array(batch_dict['rgba'][0:12])), 
+										myconfig.vox_prefix+"{0}.gt.jpg".format(epoch))
+
+				# sample train z
+				feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,True)
+				batch_rgba = rgba_.eval(feed_dict)
+				saveConcatVoxes2image(dataset.transformBack(np.array(batch_rgba[0:12])), 
+										myconfig.vox_prefix+"{0}.train.jpg".format(epoch))
+
+				# sample random z
+				random_z = np.random.normal(0, 1, [batch_size, z_size]).astype(np.float32)
+				for n in range(5):	# iterate on 5 rgbas
+					c_a = np.array(batch_dict['a'][n:n+1])
+					rep_a = np.tile(c_a, (batch_size, 1, 1, 1, 1))
+					batch_rgba = sample_rgba_.eval({a:rep_a, z:random_z, train:False})
+					saveConcatVoxes2image(dataset.transformBack(np.array(batch_rgba[0:12])), 
+											myconfig.vox_prefix+"{0}-{1}.test.jpg".format(epoch, n))
+
+
+			##################################################
+			## save network parameter
+			##################################################
+			if epoch % save_interval == 0:
+				saver.save(sess, myconfig.param_prefix+"{0}.ckpt".format(epoch))
 			
-			sess.run(opt_G, feed_dict={rgb:real_images[:,:,:,:,:3], a:real_images[:,:,:,:,3:4], indexes:indexes_, train:True})
 
-			# update fix shape regularization
-			if epoch%3 == -1:
-				sess.run(opt_G_fix_shape, feed_dict={rgb:real_images[:,:,:,:,:3], a: real_images[:,:,:,:,3:4], indexes: indexes_, train:True})
-
-			with open(myconfig.log_txt, 'a') as f:
-				batch_loss_G = loss_G.eval({rgb: real_images[:,:,:,:,:3], a: real_images[:,:,:,:,3:4], indexes: indexes_, train:False})
-				loss_dict['G'].append(batch_loss_G)
-				msg = "{0}, {1}, {2:.8f}".format(epoch, i, batch_loss_G)
-				print >> f, msg
-				print msg
-
-		with open(myconfig.loss_csv, 'a') as f:
-			loss_G_mean = np.mean(loss_dict['G'])
-			f.write("{0}, {1:.8f}\n".format(epoch, loss_G_mean))
-
-
-		##################################################
-		## draw samples on train and test dataset
-		## 
-		##################################################
-		def saveConcatVoxes2image(voxes, imname):
-			sub_names = []
-			for i,vox in enumerate(voxes):
-				# print i,vox
-				sub_name = "tmp/tmp-%d.jpg"%(i)
-				dataset.vox2image(vox, sub_name)
-				sub_names.append(sub_name)
-			dataset.concatenateImages(sub_names, imname)
-			print imname
-			for name in sub_names:
-				os.remove(name)
-
-		if epoch % sample_interval == 0:
-			indexes_, real_images = train_data.next_batch(batch_size)
-			real_images = real_images['rgba'].astype(np.float32)
-			real_rgbs = np.array(real_images[:,:,:,:,:3])
-			real_as = np.array(real_images[:,:,:,:,3:4])
-			# print real_as
-			print indexes_
-			random_z = np.random.normal(0, 1, [batch_size, z_size]).astype(np.float32)
-
-			# sample train z
-			batch_rgb = rgb_.eval({a:real_as, indexes:indexes_, train:True})
-			voxes = []
-			for nn in range(12):	# iterate on 12 zs
-				v = np.concatenate([batch_rgb[nn],real_as[nn]], -1)
-				v = dataset.transformBack(v)
-				voxes.append(v)
-			saveConcatVoxes2image(voxes, myconfig.vox_prefix+"{0}.train.jpg".format(epoch))
-
-			# sample random z
-			for n in range(5):	# iterate on 5 rgbas
-				c_image = np.array(real_images[n])
-				c_index = np.array(indexes_[n])
-				c_a = np.array(real_images[n,:,:,:,3:4])
-
-				# save ground truth
-				np.save(myconfig.vox_prefix+"%d-%d.gt.npy"%(epoch, n), dataset.transformBack(c_image))
-
-				# save generated
-				rep_a = np.tile(c_a, (batch_size, 1, 1, 1, 1))
-				batch_rgb = sampler.eval({a:rep_a, z:random_z, train:False})
-				voxes = []
-				for nn in range(12):	# iterate on 12 zs
-					v = np.concatenate([batch_rgb[nn],c_a], -1)
-					v = dataset.transformBack(v)
-					voxes.append(v)
-				saveConcatVoxes2image(voxes, myconfig.vox_prefix+"{0}-{1}.test.jpg".format(epoch, n))
-
-							
-
-
-		##################################################
-		## save network parameter
-		##################################################
-		if epoch % save_interval == 0:
-			saver.save(sess, myconfig.param_prefix+"{0}.ckpt".format(epoch))
-		
-
-		
 

@@ -444,5 +444,11 @@ epoch 2007:
 
 epoch 3001:
 	l1 loss on rgb
+	(32,)
+
+epoch 3002:
+	l1 loss on rgb
+	(64,)
+
 
 

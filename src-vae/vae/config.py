@@ -1,7 +1,7 @@
-train_dataset_path = "../../data/npy_list.02958343.32.voxels.txt.train"
-test_dataset_path = "../../data/npy_list.02958343.32.voxels.txt.test"
+train_dataset_path = "../../data/npy_list.02958343.64.points.txt.train"
+test_dataset_path = "../../data/npy_list.02958343.64.points.txt.test"
 
-version = 3001
+version = 3002
 
 ITER_MIN = 1
 ITER_MAX = 501

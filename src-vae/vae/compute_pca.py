@@ -4,13 +4,13 @@ import os
 import sys
 import dataset
 def read_txt(txtFile):
-    txtDir = os.path.dirname(txtFile)
-    obj_path_list = []
-    for obj_path in open(txtFile, 'r'):
-        obj_path = obj_path.strip().split()[0]
-        obj_path = os.path.join(txtDir, obj_path)
-        obj_path_list.append(obj_path)
-    return obj_path_list
+	txtDir = os.path.dirname(txtFile)
+	obj_path_list = []
+	for obj_path in open(txtFile, 'r'):
+		obj_path = obj_path.strip().split()[0]
+		obj_path = os.path.join(txtDir, obj_path)
+		obj_path_list.append(obj_path)
+	return obj_path_list
 
 txt_path = sys.argv[1]
 examples = np.array(read_txt(txt_path))
@@ -20,9 +20,17 @@ z_size = 20
 batch = {'rgba':[]}
 
 for fname in examples:
-    vox = np.load(fname)
-    data = dataset.transformTo(vox)
-    batch['rgba'].append(data['rgba'])
+	if '64.points.npy' in fname:
+		points = np.load(fname)
+		vox = dataset.points2vox(points,64)
+	elif '32.points.npy' in fname:
+		points = np.load(fname)
+		vox = dataset.points2vox(points,32)
+	else:
+		vox = np.load(fname)
+	vox = dataset.transformTo(vox)
+
+	batch['rgba'].append(vox)
 
 batch['rgba'] = np.array(batch['rgba'])
 
@@ -30,7 +38,7 @@ batch['rgba'] = np.array(batch['rgba'])
 real_images = batch['rgba']
 
 #flattened_images = tf.Variable([0.0])
-place = tf.placeholder(tf.float32, shape=(batch_size, 32, 32, 32, 4))
+place = tf.placeholder(tf.float32, shape=(batch_size, 64, 64, 64, 4))
 #set_x = flattened_images.assign(place)
 flattened_images = tf.Variable(place)
 sess = tf.Session()
@@ -41,7 +49,7 @@ flattened_images = flattened_images - tf.reduce_mean(flattened_images, axis=0)
 cov_matrix = tf.matmul(flattened_images, tf.transpose(flattened_images))
 ##get the eigenvalues of covariance matrix
 [e,v] = tf.self_adjoint_eig(cov_matrix)
-    ##get the top k eigenvectors
+	##get the top k eigenvectors
 [topkval, topk_idx] = tf.nn.top_k(e, z_size)
  
 topkv = tf.gather(tf.transpose(v), topk_idx)
@@ -49,6 +57,6 @@ topkv_ori = tf.matmul(topkv, flattened_images)
 proj_images = tf.matmul(flattened_images, tf.transpose(topkv_ori))
 root_n = tf.constant(np.sqrt(batch_size),'float32')
 proj_images = tf.scalar_mul(root_n,tf.nn.l2_normalize(proj_images, 0, epsilon=1e-12, name=None))
-np.save('pca_vectors.npy', sess.run(proj_images))
+np.save(txt_path+'.pca_vectors.npy', sess.run(proj_images))
 print "success"
 
