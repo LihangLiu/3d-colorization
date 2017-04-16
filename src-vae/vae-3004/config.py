@@ -8,7 +8,7 @@ ITER_MAX = 501
 save_interval = 10
 pca_path = train_dataset_path+".pca_vectors.npy"
 preload_model = ""
-# preload_model = "../../outputs/params/params%d_%d.ckpt"%(version,ITER_MIN)
+#preload_model = "../../outputs/params/params%d_%d.ckpt"%(version,ITER_MIN)
 
 loss_csv = "../../outputs/losses/loss_%d.csv"%(version)
 vox_prefix = "../../outputs/voxels/epoch%d_"%(version)

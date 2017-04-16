@@ -19,7 +19,7 @@ def prepare_feed_dict(batch_dict, rgba, a, z, train, flag):
     fetch_dict = {a:batch_dict['a'], z:batch_dict['z'],rgba:batch_dict['rgba'], train:flag}
     return fetch_dict
     
-data = dataset.read()
+train_data = dataset.Dataset(myconfig.dataset_path)
 
 batch_size = 32
 lr = 5e-5
@@ -73,9 +73,7 @@ for v in var_D:
 
 print '\nepoch: ', myconfig.version
 
-print 'loss_csv:', myconfig.loss_csv
-print 'vox_prefix:', myconfig.vox_prefix
-print 'param_prefix', myconfig.param_prefix
+print 'preload mode', myconfig.preload_model
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -84,11 +82,10 @@ config.gpu_options.allow_growth = True
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 sess.run(tf.global_variables_initializer())
-model_path = "../../outputs/params/params59_50.ckpt"
-saver.restore(sess, model_path)
+saver.restore(sess, myconfig.preload_model)
 
 # fetch variables
-batch_dict = prepare_batch_dict(data.train.next_batch(batch_size))
+batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
 feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, train,False)
 fetches_G = sess.run(loss_G, feed_dict=feed_dict)
 

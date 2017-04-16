@@ -113,7 +113,7 @@ if __name__ == '__main__':
 		## train
 		##################################################
 		for epoch in xrange(myconfig.ITER_MIN, myconfig.ITER_MAX):
-			loss_dict = {'G':[]}
+			loss_dict = {'G':[], 'G_fix':[]}
 			for i in xrange(total_batch):
 				# read batch data
 				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
@@ -129,14 +129,18 @@ if __name__ == '__main__':
 				with open(myconfig.log_txt, 'a') as f:
 					feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,False)
 					batch_loss_G = loss_G.eval(feed_dict)
+					feed_dict = prepare_fix_shape_feed_dict(batch_dict, rgb, a, indexes, train,False)
+					batch_loss_G_fix = loss_G.eval(feed_dict)
 					loss_dict['G'].append(batch_loss_G)
-					msg = "{0}, {1}, {2:.8f}".format(epoch, i, batch_loss_G)
+					loss_dict['G_fix'].append(batch_loss_G_fix)
+					msg = "{0}, {1}, {2:.8f}, {3:.8f}".format(epoch, i, batch_loss_G, batch_loss_G_fix)
 					print >> f, msg
 					print msg
 
 			with open(myconfig.loss_csv, 'a') as f:
 				loss_G_mean = np.mean(loss_dict['G'])
-				f.write("{0}, {1:.8f}\n".format(epoch, loss_G_mean))
+				loss_G_fix_mean = np.mean(loss_dict['G_fix'])
+				f.write("{0}, {1:.8f}, {2:.8f}\n".format(epoch, loss_G_mean, loss_G_fix_mean))
 
 
 			##################################################
