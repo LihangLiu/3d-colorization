@@ -458,9 +458,28 @@ epoch 3003:
 epoch 3004:
 	3003: l1 loss + fix_shape
 		noise stddev=0.1 
+	-loss dropped less
 
 epoch 3005:
 	3002: l1 loss
 		noise stddev=1
 		z_size = 5 <- 20
+	-grey outputs
+
+
+# # # # # # # # # # # #
+# VAE-CWGAN
+# # # # # # # # # # # #
+
+epoch 3010:
+	3002: l1 loss + cwgan
+	vae has higher learning rate
+
+epoch 3011:
+	3010: l1 loss + cwgan
+	the same learning rate
+
+
+
+
 
