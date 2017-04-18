@@ -1,9 +1,18 @@
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.cm as cm
 import numpy as np
-import collections
-import glob
+from scipy.misc import imread
+from os.path import dirname
 import os
-import random
+import sys
 import time
+import random
+
 
 
 class Dataset:
@@ -46,9 +55,7 @@ class Dataset:
 		return self.read_data(start, end)
 
 	def read_data(self, start, end):
-		# 
 		batch = {'rgba':[], 'syn_id':[]}
-		#s = time.time()
 		for fname, syn_id in self.examples[start:end]:
 			if '64.points.npy' in fname:
 				points = np.load(fname)
@@ -59,32 +66,46 @@ class Dataset:
 			else:
 				vox = np.load(fname)
 			#vox = voxJitter(vox)
-			data = transformTo(vox)
-			batch['rgba'].append(data['rgba'])
+			vox = transformTo(vox)
+			batch['rgba'].append(vox)
 			batch['syn_id'].append(int(syn_id))
-		#print 'time ', time.time()-s
+
 		batch['rgba'] = np.array(batch['rgba'])
 		batch['syn_id'] = np.array(batch['syn_id'])
 		return batch
 
 
-######### dataset <-> network #########
+#######################
+## dataset <-> network
+#######################
 
 # from dataset to network
 # (0,1) -> (-1,1)
+# input: voxel or batch_voxel
 def transformTo(vox):
-	vox = (vox-0.5)*2
-
-	data = {'rgba':vox}
-	return data
+	new_vox = np.array(vox)
+	shape = new_vox.shape
+	assert len(shape)==4 or len(shape)==5
+	assert shape[-1] == 4
+	new_vox = (new_vox-0.5)*2
+	return new_vox
 
 # from network to dataset
 # rgb: (-1,1) -> (0,1)
 # a:   (-1,0) -> 0; (0,1) -> 1
+# input: voxel or batch_voxel
 def transformBack(vox):
-	vox[:,:,:,3] = (vox[:,:,:,3]>0)
-	vox[:,:,:,0:3] = vox[:,:,:,0:3]*0.5+0.5
-	return vox
+	new_vox = np.array(vox)
+	shape = new_vox.shape
+	assert len(shape)==4 or len(shape)==5
+	assert shape[-1] == 4
+	if len(shape)==4:
+		new_vox[:,:,:,3] = (new_vox[:,:,:,3]>0)
+		new_vox[:,:,:,0:3] = new_vox[:,:,:,0:3]*0.5+0.5
+	else:
+		new_vox[:,:,:,:,3] = (new_vox[:,:,:,:,3]>0)
+		new_vox[:,:,:,:,0:3] = new_vox[:,:,:,:,0:3]*0.5+0.5
+	return new_vox
 
 
 def points2vox(points,N):
@@ -102,7 +123,42 @@ def points2vox(points,N):
 	vox[xs,ys,zs,3] = 1
 	return vox
 
-######### voxel jitter #########
+
+#######################
+## vox to image
+#######################
+
+def concatenateImages(imname_list,out_imname):
+	N = len(imname_list)
+	W = 4
+	H = int((N-1)/W)+1
+	for i,imname in enumerate(imname_list):
+		plt.subplot(H, W, i+1)
+		img = imread(imname)
+		plt.imshow(img)
+	plt.savefig(out_imname,dpi=1000)
+	plt.close()
+	
+
+def vox2image(vox,imname):
+	# draw 
+	fig = plt.figure()
+	ax = fig.gca(projection='3d')
+	ax.set_aspect("equal")
+	dim = vox.shape[0]
+	ax.set_xlim(0, dim)
+	ax.set_ylim(0, dim)
+	ax.set_zlim(0, dim)
+	xs,ys,zs,rgbs = getPoints(vox)
+	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs) #, s=5)
+
+	plt.savefig(imname)
+	plt.close(fig)
+
+
+#######################
+## voxel jitter 
+#######################
 
 def getBoundary(vox):
 	xs,ys,zs,_ = getPoints(vox)
