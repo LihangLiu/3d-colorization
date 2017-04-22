@@ -40,6 +40,21 @@ class batch_norm(object):
 					scope=self.name)
 
 
+def mask(rgb, a):
+	### rgb \in (-1,1), (batch, 64, 64, 64, 3)
+	### a \in {-1,1},	(batch, 64, 64, 64, 1)
+	# (-1,1) -> (0,1)
+	rgb = rgb*0.5 + 0.5
+	a = a*0.5 + 0.5
+	# mask
+	rep_a = tf.concat([a,a,a], -1)
+	rgb = tf.multiply(rgb,rep_a)
+	rgba = tf.concat([rgb,a], -1)
+	# (0,1) -> (-1,1)
+	rgba = (rgba-0.5)*2
+
+	return rgba
+
 ### 
 ### 
 class Generator(object):
@@ -89,7 +104,7 @@ class Generator(object):
 		N = shape[0]
 		ngf = self.ngf
 
-		# add noise
+		# add z
 		z = tf.matmul(z, self.W['hz'])		# z:(n,64*64*64)
 		z = tf.reshape(z, [-1,64,64,64,1]) 	# z:(n,64,64,64,1)
 		h = tf.concat([a,z], -1)			# (n,64,64,64,2)
@@ -111,22 +126,7 @@ class Generator(object):
 		rgb = tf.nn.tanh(deconv3d(dh5, self.W['dh6'], [N,64,64,64,3]) + self.b['dh6']) 	#(n,64,64,64,3)
 
 		# mask
-		rgba = self.mask(rgb,a)
-
-		return rgba
-
-	def mask(self, rgb, a):
-		### rgb \in (-1,1), (batch, 64, 64, 64, 3)
-		### a \in {-1,1},	(batch, 64, 64, 64, 1)
-		# (-1,1) -> (0,1)
-		rgb = rgb*0.5 + 0.5
-		a = a*0.5 + 0.5
-		# mask
-		rep_a = tf.concat([a,a,a], -1)
-		rgb = tf.multiply(rgb,rep_a)
-		rgba = tf.concat([rgb,a], -1)
-		# (0,1) -> (-1,1)
-		rgba = (rgba-0.5)*2
+		rgba = mask(rgb,a)
 
 		return rgba
 
@@ -151,12 +151,12 @@ class Discriminator(object):
 				'dh3': weight_variable('dh3', [4, 4, 4, ngf*4, ngf*8]),
 				'dh4': weight_variable('dh4', [4, 4, 4, ngf*2, ngf*4]),
 				'dh5': weight_variable('dh5', [4, 4, 4, ngf, ngf*2]),
-				'dh6': weight_variable('dh6', [4, 4, 4, 4, ngf])
+				'dh6': weight_variable('dh6', [4, 4, 4, 3, ngf])
 			}
 
 			self.b = {
 				'h1': bias_variable('bias-h1', [ngf]),
-				'dh6': bias_variable('bias-dh6', [4]),
+				'dh6': bias_variable('bias-dh6', [3]),
 			}
 
 			self.bn2 = batch_norm(name = 'd-bn2')
@@ -172,7 +172,7 @@ class Discriminator(object):
 			self.dbn5 = batch_norm(name = 'd-dbn5')
 
 	def __call__(self, rgba, train):
-		shape = rgba.get_shape().as_list()		# (n,64,64,64,1)
+		shape = rgba.get_shape().as_list()		# (n,64,64,64,4)
 		N = shape[0]
 		ngf = self.ngf
 
@@ -190,7 +190,11 @@ class Discriminator(object):
 		dh3 = tf.nn.relu(self.dbn3(deconv3d(dh2, self.W['dh3'], [N,8,8,8,ngf*4]), train)) #(n,8,8,8,f*4)
 		dh4 = tf.nn.relu(self.dbn4(deconv3d(dh3, self.W['dh4'], [N,16,16,16,ngf*2]), train)) #(n,16,16,16,f*2)
 		dh5 = tf.nn.relu(self.dbn5(deconv3d(dh4, self.W['dh5'], [N,32,32,32,ngf]), train)) #(n,32,32,32,f)
-		rgba_out = tf.nn.tanh(deconv3d(dh5, self.W['dh6'], [N,64,64,64,4]) + self.b['dh6']) 	#(n,64,64,64,4)
+		rgb_out = tf.nn.tanh(deconv3d(dh5, self.W['dh6'], [N,64,64,64,3]) + self.b['dh6']) 	#(n,64,64,64,3)
+
+		# mask
+		a = rgba[:,:,:,:,3:4]		# (n,64,64,64,1)
+		rgba_out = mask(rgb_out,a)
 
 		return rgba_out
 

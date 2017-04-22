@@ -1,12 +1,12 @@
 train_dataset_path = "../../data/npy_list.02958343.64.points.txt.train"
 
-version = 1100
+version = 1101
 
-ITER_MIN = 1
-ITER_MAX = 501
+ITER_MIN = 450
+ITER_MAX = 1001
 save_interval = 50
-preload_model = ""
-# preload_model = "../../outputs/params/params%d_%d.ckpt"%(version,ITER_MIN)
+#preload_model = ""
+preload_model = "../../outputs/params/params%d_%d.ckpt"%(version,ITER_MIN)
 
 loss_csv = "../../outputs/losses/loss_%d.csv"%(version)
 vox_prefix = "../../outputs/voxels/epoch%d_"%(version)

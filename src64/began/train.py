@@ -128,7 +128,7 @@ with tf.Session(config=config) as sess:
 			sub_names = []
 			for i,vox in enumerate(voxes): 
 				# print i,vox
-				sub_name = "tmp/tmp-%d.jpg"%(i)
+				sub_name = "tmp/tmp-%d-%d.jpg"%(myconfig.version,i)
 				dataset.vox2image(vox, sub_name)
 				sub_names.append(sub_name)
 			dataset.concatenateImages(sub_names, imname)
@@ -142,13 +142,18 @@ with tf.Session(config=config) as sess:
 
 			# save ground-truth
 			saveConcatVoxes2image(dataset.transformBack(np.array(batch_dict['rgba'][0:12])), 
-									myconfig.vox_prefix+"{0}.gt.jpg".format(epoch))
+									myconfig.vox_prefix+"{0}.rgba.jpg".format(epoch))
 
 			# save generated
-			feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, k_t,k_t_, train,True)
-			batch_rgba = rgba_.eval(feed_dict)
-			saveConcatVoxes2image(dataset.transformBack(np.array(batch_rgba[0:12])), 
-									myconfig.vox_prefix+"{0}.generated1.jpg".format(epoch))
+			feed_dict = prepare_feed_dict(batch_dict, rgba, a, z, k_t,k_t_, train,False)
+			b_rgba_out, b_rgba_, b_rgba_out_ = sess.run([rgba_out, rgba_, rgba_out_], feed_dict=feed_dict)
+			saveConcatVoxes2image(dataset.transformBack(np.array(b_rgba_out[0:12])), 
+									myconfig.vox_prefix+"{0}.rgba_out.jpg".format(epoch))
+			saveConcatVoxes2image(dataset.transformBack(np.array(b_rgba_[0:12])), 
+									myconfig.vox_prefix+"{0}.rgba_.jpg".format(epoch))
+			saveConcatVoxes2image(dataset.transformBack(np.array(b_rgba_out_[0:12])), 
+									myconfig.vox_prefix+"{0}.rgba_out_.jpg".format(epoch))
+
 
 		##################################################
 		## save trained model
