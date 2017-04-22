@@ -403,6 +403,19 @@ epoch 1006:
 
 
 # # # # # # # # # # # #
+# began
+# # # # # # # # # # # # 
+
+epoch 1101:
+	began
+		lr: 5e-5
+
+epoch 1102:
+	1101: began
+		lr: 5e-5*10
+		
+
+# # # # # # # # # # # #
 # classification on (64,64,64,4)
 # # # # # # # # # # # #
 
@@ -436,6 +449,9 @@ epoch 2007:
 	D=0.02, exp(-0.1*alpha*(d)^2), init alpha=0.1
 	3 alphas -> c_out alphas 
 
+epoch 2009:
+	shapenets + conv2_5d
+	[ci]
 
 
 # # # # # # # # # # # #
@@ -450,14 +466,16 @@ epoch 3001:
 
 epoch 3002:
 	l1 loss
+		noise stddev=1.0
 
 epoch 3003:
 	3002: l1 loss
 		noise stddev=0.1 <- 1.0
+	-more colorful
 
 epoch 3004:
 	3003: l1 loss + fix_shape
-		noise stddev=0.1 
+		noise stddev=.0
 	-loss dropped less
 
 epoch 3005:
@@ -466,6 +484,14 @@ epoch 3005:
 		z_size = 5 <- 20
 	-grey outputs
 
+epoch 3006:
+	3003: fix_shape
+		remove noise
+		
+epoch 3007:
+	3003: l1 loss
+		remove noise
+		ngf = 15 <- 9
 
 # # # # # # # # # # # #
 # VAE-CWGAN
@@ -473,12 +499,12 @@ epoch 3005:
 
 epoch 3010:
 	3002: l1 loss + cwgan
-	vae has higher learning rate
+		vae has higher learning rate
 
 epoch 3011:
 	3010: l1 loss + cwgan
-	the same learning rate
-
+		the same learning rate
+	-
 
 
 
