@@ -11,17 +11,16 @@ def obj2vox(filename, N, C):
 	return grid
 
 if __name__ == '__main__':
-	filename = os.path.abspath(sys.argv[1])
+	N = int(sys.argv[1])
+	filename = os.path.abspath(sys.argv[2])
 
 	# load obj file and convert to vox
-	N = 32
 	C = 4
 	grid = obj2vox(filename,N,C)
 
 	# save to npy file
-	if len(sys.argv) > 1:
-		npy_path = sys.argv[2]
-		np.save(npy_path, grid)
+	npy_path = sys.argv[3]
+	np.save(npy_path, grid)
 
 
 
