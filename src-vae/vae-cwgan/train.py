@@ -84,9 +84,9 @@ if __name__ == '__main__':
 	var_G = [v for v in tf.trainable_variables() if 'g_' in v.name]
 	var_D = [v for v in tf.trainable_variables() if 'd_' in v.name]
 
-	opt_vae = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_vae, var_list=var_G)
-	opt_D = tf.train.RMSPropOptimizer(learning_rate=5e-5).minimize(loss_D, var_list=var_D)
-	opt_G = tf.train.RMSPropOptimizer(learning_rate=5e-5).minimize(loss_G, var_list = var_G)
+	opt_vae = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(loss_vae, var_list=var_G)
+	opt_G = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(loss_G, var_list = var_G)
+	opt_D = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(loss_D, var_list=var_D)
 	clip_D = [v.assign(tf.clip_by_value(v, -0.01, 0.01)) for v in var_D]
 
 	print 'var_G'

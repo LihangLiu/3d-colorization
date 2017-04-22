@@ -491,7 +491,7 @@ epoch 3005:
 epoch 3006:
 	3003: fix_shape
 		remove noise
-	-wrong mask need to be fixed
+	-tbd: wrong mask need to be fixed
 		
 epoch 3007:
 	3003: l1 loss
@@ -509,7 +509,7 @@ epoch 3010:
 
 epoch 3011:
 	3010: l1 loss + cwgan
-		the same learning rate
+		the same learning rate and optimizer
 	-
 
 # # # # # # # # # # # #
