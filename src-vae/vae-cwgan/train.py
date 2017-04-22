@@ -136,39 +136,39 @@ if __name__ == '__main__':
 		for epoch in xrange(myconfig.ITER_MIN, myconfig.ITER_MAX):
 			loss_list = {'vae':[], 'G':[], 'D':[]}
 			for i in xrange(total_batch):				
-				###############
-				## train vae
-				###############
-				# update Generator
-				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
-				feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,True)
-				sess.run(opt_vae, feed_dict=feed_dict)
+				# ###############
+				# ## train vae
+				# ###############
+				# # update Generator		
+				# batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))				
+				# feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,True)				
+				# sess.run(opt_vae, feed_dict=feed_dict)		
 
 				# update fix shape regularization
 				# feed_dict = prepare_fix_shape_feed_dict(batch_dict, rgb, a, indexes, train,True)
 				# sess.run(opt_vae, feed_dict=feed_dict)
 
-				###############
-				## train wgan
-				###############
+				#####################
+				## train wgan and vae
+				#####################
 				# train D
 				d_iters = 5
 				if gen_iterations % 500 == 0 or gen_iterations < 25:
 					 d_iters = 100
-				for j in range(0, d_iters):
-					batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
-					feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,True)
-					sess.run(clip_D)
-					sess.run(opt_D, feed_dict=feed_dict)
+				for j in range(0, d_iters):			
+					batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))						
+					feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,True)						
+					sess.run(clip_D)						
+					sess.run(opt_D, feed_dict=feed_dict)			
 
 				# train G
 				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
 				feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,True)
-				sess.run(opt_G, feed_dict=feed_dict)
+				sess.run([opt_G,opt_vae], feed_dict=feed_dict)
 
 				###############
 				## evaluate
-				###############
+				###############				
 				batch_dict = prepare_batch_dict(train_data.next_batch(batch_size))
 				feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,False)
 				batch_loss_list = sess.run([loss_vae, loss_G, loss_D], feed_dict=feed_dict)
@@ -178,14 +178,15 @@ if __name__ == '__main__':
 				with open(myconfig.log_txt, 'a') as f:
 					msg = "%d %d "%(epoch,i) + str(batch_loss_list)
 					print >> f, msg
-					print msg
+					print msg								
 				# output gradients
-				grad = tf.gradients(loss_vae, G.W['dh5'])[0]
-				print 'grad vae: \n', grad.eval(feed_dict)[0][0][0]
-				grad = tf.gradients(loss_G, G.W['dh5'])[0]
-				print 'grad G: \n', grad.eval(feed_dict)[0][0][0]
-				grad = tf.gradients(loss_D, G.W['dh5'])[0]
-				print 'grad D: \n', grad.eval(feed_dict)[0][0][0]
+				if i%50 == 0:
+					grad = tf.gradients(loss_vae, G.W['dh5'])[0]
+					print 'grad vae: \n', grad.eval(feed_dict)[0][0][0]
+					grad = tf.gradients(loss_G, G.W['dh5'])[0]
+					print 'grad G: \n', grad.eval(feed_dict)[0][0][0]
+					grad = tf.gradients(loss_D, G.W['dh5'])[0]
+					print 'grad D: \n', grad.eval(feed_dict)[0][0][0]				
 
 				# used for wgan
 				gen_iterations +=  1
@@ -220,7 +221,7 @@ if __name__ == '__main__':
 										myconfig.vox_prefix+"{0}.gt.jpg".format(epoch))
 
 				# sample train z
-				feed_dict = prepare_feed_dict(batch_dict, rgb, a, indexes, train,True)
+				feed_dict = prepare_feed_dict(batch_dict, rgba, rgb, a, indexes, train,False)
 				batch_rgba = rgba_.eval(feed_dict)
 				saveConcatVoxes2image(dataset.transformBack(np.array(batch_rgba[0:12])), 
 										myconfig.vox_prefix+"{0}.train.jpg".format(epoch))

@@ -114,10 +114,10 @@ class Generator(object):
 		ngf = self.ngf
 
 		# conv
-		h1 = addRandomNormal(lrelu(conv3d(a,self.W['h1']) + self.b['h1']))	# (n,32,32,32,f)
-		h2 = addRandomNormal(lrelu(self.bn2(conv3d(h1,self.W['h2']), train))) # (n,16,16,16,f*2)
-		h3 = addRandomNormal(lrelu(self.bn3(conv3d(h2,self.W['h3']), train))) # (n,8,8,8,f*4)
-		h4 = addRandomNormal(lrelu(self.bn4(conv3d(h3,self.W['h4']), train))) # (n,4,4,4,f*8)
+		h1 = lrelu(conv3d(a,self.W['h1']) + self.b['h1'])	# (n,32,32,32,f)
+		h2 = lrelu(self.bn2(conv3d(h1,self.W['h2']), train)) # (n,16,16,16,f*2)
+		h3 = lrelu(self.bn3(conv3d(h2,self.W['h3']), train)) # (n,8,8,8,f*4)
+		h4 = lrelu(self.bn4(conv3d(h3,self.W['h4']), train)) # (n,4,4,4,f*8)
 		h5 = lrelu(self.bn5(conv3d(h4,self.W['h5']), train)) # (n,2,2,2,f*16)
 
 		# add z
