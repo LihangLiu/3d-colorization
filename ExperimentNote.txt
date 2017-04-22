@@ -451,7 +451,11 @@ epoch 2007:
 
 epoch 2009:
 	shapenets + conv2_5d
-	[ci]
+	3 [ci] for each layer
+
+epoch 2010:
+	shapenets + conv2_5d
+	[ci] for every 5 c_out
 
 
 # # # # # # # # # # # #
@@ -487,11 +491,13 @@ epoch 3005:
 epoch 3006:
 	3003: fix_shape
 		remove noise
+	-wrong mask need to be fixed
 		
 epoch 3007:
 	3003: l1 loss
 		remove noise
 		ngf = 15 <- 9
+	-seems overfitting
 
 # # # # # # # # # # # #
 # VAE-CWGAN
