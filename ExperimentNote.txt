@@ -512,6 +512,15 @@ epoch 3011:
 		the same learning rate
 	-
 
+# # # # # # # # # # # #
+# VAE-CGAN
+# # # # # # # # # # # #
+
+epoch 3012:
+	3003: l1 loss + cgan
+		remove noise
+
+
 
 
 
