@@ -421,14 +421,17 @@ epoch 1102:
 
 epoch 2001:
 	shapenets
+	-0.852971
 
 epoch 2002:
 	shapenets + conv2_5d
 	D=0.02, exp(-alpha*(d)^2), init alpha=0.1
+	-0.863217
 
-epoch 2003:
+epoch 2003:***
         shapenets + conv2_5d
         D=0.02, exp(-0.1*alpha*(d)^2), init alpha=0.1
+	-0.864344
 
 epoch 2004:
 	shapenets + conv2_5d
@@ -449,13 +452,25 @@ epoch 2007:
 	D=0.02, exp(-0.1*alpha*(d)^2), init alpha=0.1
 	3 alphas -> c_out alphas 
 
-epoch 2009:
+epoch 2009: ****
 	shapenets + conv2_5d
 	3 [ci] for each layer
+	-0.864652
 
 epoch 2010:
 	shapenets + conv2_5d
 	[ci] for every 5 c_out
+
+epoch 2011:
+	2010:
+	shapenets + conv2_5d
+	[ci] for every 5 c_out
+	h1-h5
+
+epoch 2012:
+	2010:
+	shapenets + conv2_5d
+	3 c for each layer
 
 
 # # # # # # # # # # # #
@@ -519,6 +534,11 @@ epoch 3011:
 epoch 3012:
 	3003: l1 loss + cgan
 		remove noise
+
+epoch 3013:
+	3012: l1 loss + cgan
+		lr: 1:10
+		run cgan first, original bn vbn
 
 
 
