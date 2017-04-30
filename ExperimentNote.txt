@@ -471,7 +471,7 @@ epoch 2012:
 	2010:
 	shapenets + conv2_5d
 	3 c for each layer
-
+	-0.860758
 
 # # # # # # # # # # # #
 # VAE
