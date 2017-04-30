@@ -1,5 +1,5 @@
-# 1. .obj -> .npy
-  c++ implementation and python interface
+# 1. obj -> vox
+  c++ implementation and python interface. Textures not considered.
   
 ## Install
 	python setup.py install --user
@@ -12,14 +12,14 @@
   
 	batch_obj2vox.sh /path/to/objdata/root
 
-# 2. Visualize .npy file
+# 2. Visualize vox file
   alpha channel: non-0 as 1. 
   
   rgb channels: assume to between (0,1), otherwise clipped to be (0,1).
 
 	python visvox.py path/to/npyfile.npy
 	
-# 3. .npy -> .jpg 
+# 3. vox -> .jpg 
   alpha channel: non-0 as 1. 
   
   rgb channels: assume to between (0,1), otherwise clipped to be (0,1).
