@@ -8,24 +8,24 @@ set -e
 obj2labpoints() {
 	obj_dir=`dirname $2`
 	obj_name=`basename $2`
-    # cd to the vox directory
-    cd $obj_dir
-    #echo -en "\r\033[K $1"
-    points_name=$obj_name.$1.labpoints.npy
-    if [ -f $points_name ];
-    then
-            echo -en "\r\033[Kexisting $points_name"
-    else
-            python $py_dir/obj2labpoints.py $1 $obj_name $points_name
-            chmod 755 $points_name
-            echo "converted to $obj_dir/$points_name"
-    fi
+	# cd to the vox directory
+	cd $obj_dir
+	#echo -en "\r\033[K $1"
+	points_name=$obj_name.$1.labpoints.npy
+	if [ -f $points_name ];
+	then
+			echo -en "\r\033[Kexisting $points_name"
+	else
+			python $py_dir/obj2labpoints.py $1 $obj_name $points_name
+			chmod 755 $points_name
+			echo "converted to $obj_dir/$points_name"
+	fi
 }
 
 # check arguments
 if [ "$#" -lt 2 ]; then
-        echo "usage: batch_obj2labpoints.sh N path/to/objroot"
-        exit 1
+		echo "usage: batch_obj2labpoints.sh N path/to/objroot"
+		exit 1
 fi
 echo "lookup *.obj under $2"
 

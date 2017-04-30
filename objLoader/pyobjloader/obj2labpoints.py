@@ -1,53 +1,67 @@
-# cd path/to/objroot
-# usage: python path/to/obj2labpoints.py N file.obj path/to/saved.npy 
-#
+# 
+# convert vox to a new obj file with the help of original obj file.
+# usage: python vox2obj.py vox.npy oldobj.obj output/path
 
 import sys
-import os
+from os.path import join
 import numpy as np
-import tinyobjloader as tol
+import random
 import time
+from scipy.misc import imread
 from skimage import io, color
 
-def getPoints(vox):
-## xs: (n,1)
-## rbgs: (n,1)
-        vox_a = vox[:,:,:,3]
-        xs,ys,zs = np.nonzero(vox_a)
-        labs = vox[xs,ys,zs,0:3]
-        return xs,ys,zs,labs
+from objloader import *
+from obj2vox import obj2vox
+from obj2points import vox2points
 
-def obj2labvox(filename, N, C):
-	grid = tol.LoadObj2Vox(filename,N)
-	grid = np.array(grid)
-	grid = np.reshape(grid, (N,N,N,C))
-	labs = color.rgb2lab(grid[:,:,:,0:3])
-	labs[:,:,:,0] = labs[:,:,:,0]/100.0
-	labs[:,:,:,1] = labs[:,:,:,1]/115.0
-	labs[:,:,:,2] = labs[:,:,:,2]/115.0
-	grid[:,:,:,0:3] = labs
-	return grid
+def vox2labvox(vox):
+  labs = color.rgb2lab(vox[:,:,:,0:3])
+  labs[:,:,:,0] = labs[:,:,:,0]/100.0
+  labs[:,:,:,1] = labs[:,:,:,1]/115.0
+  labs[:,:,:,2] = labs[:,:,:,2]/115.0
+  vox[:,:,:,0:3] = labs
+  return vox
 
-def obj2labpoints(filename, N, C):
-	vox = obj2labvox(filename, N, C)
-	xs,ys,zs,labs = getPoints(vox)
-	xs,ys,zs = [np.expand_dims(vs,axis=1) for vs in [xs,ys,zs]]
-	points = np.concatenate((xs,ys,zs,labs),axis=1)
-	return points
+def obj2labpoints(obj,N):
+  vox = obj2vox(obj, N)
+  labvox = vox2labvox(vox)
+  labpoints = vox2points(labvox)
+  return labpoints
 
 if __name__ == '__main__':
-	# load obj file and convert to points
-	s = time.time()
-	N = int(sys.argv[1])
-	filename = os.path.abspath(sys.argv[2])
-	C = 4
-	points = obj2labpoints(filename,N,C)
+  # print sys.argv
+  if len(sys.argv)!=4:
+    print 'usage: python obj2vox.py N obj.obj labpoints.npy'
+    exit(0)
+  # input 
+  start = time.time()
+  N = int(sys.argv[1])
+  obj = OBJ(sys.argv[2], swapyz=False)
+  labpoints_path = sys.argv[3]
+  # print 'total faces', len(obj.faces)
+  # print 'textures'
+  # for mtl_id in obj.mtl:
+  #   if 'image' in obj.mtl[mtl_id]:
+  #     print obj.mtl[mtl_id]['map_Kd']
 
-	# save to npy file
-	npy_path = sys.argv[3]
-	np.save(npy_path, points)
+  # convert obj to vox
+  labpoints = obj2labpoints(obj,N)
 
-	print "time: ", time.time()-s
+  # save to npy file
+  np.save(labpoints_path, labpoints)
+  # print 'generated', labpoints_path
+  print 'time used', time.time()-start
+
+
+
+
+
+
+
+  
+
+
+
 
 
 
