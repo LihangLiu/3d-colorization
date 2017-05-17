@@ -120,13 +120,13 @@ if __name__ == '__main__':
 	else:
 		vox = np.load(voxpath)
 
-	# vox[:,:,:,0] = vox[:,:,:,0]*100.0
-	# vox[:,:,:,1] = vox[:,:,:,1]*115.0
-	# vox[:,:,:,2] = vox[:,:,:,2]*115.0
-	# subvox = np.reshape(vox[:,:,:,0:3],[1,-1,3])
-	# subvox = color.lab2rgb(subvox)
-	# subvox = np.reshape(subvox,[64,64,64,3])
-	# vox[:,:,:,0:3] = subvox
+	vox[:,:,:,0] = vox[:,:,:,0]*100.0
+	vox[:,:,:,1] = vox[:,:,:,1]*115.0
+	vox[:,:,:,2] = vox[:,:,:,2]*115.0
+	subvox = np.reshape(vox[:,:,:,0:3],[1,-1,3])
+	subvox = color.lab2rgb(subvox)
+	subvox = np.reshape(subvox,[64,64,64,3])
+	vox[:,:,:,0:3] = subvox
 	
 	N = vox.shape[0]
 	old_obj_name = sys.argv[2]

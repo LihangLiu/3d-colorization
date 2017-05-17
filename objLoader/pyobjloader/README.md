@@ -15,6 +15,8 @@
   
   
 # 4. vox -> obj
-  generate new obj file with path output_path/model_from_vox.obj and new mtl file with path output_path/model_from_vox.mtl
+  vox.npy with lab color space. 
 
-	python vox2obj.py vox.npy oldobj.obj output/path
+  generate new obj file with path output_path/model_from_vox.obj and new mtl file with path output_path/model_from_vox.mtl. 
+
+	python vox2obj_gsemantic.py vox.npy oldobj.obj output/path
