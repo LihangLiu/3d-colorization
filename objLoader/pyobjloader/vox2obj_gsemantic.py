@@ -42,7 +42,10 @@ def write2mtl(new_mtl_name, mtl, mtlkd_dict):
 			print >> f, 'Kd %f %f %f'%(new_kd[0],new_kd[1],new_kd[2])
 			for subkey in mtl[mtl_id]:
 				if subkey == 'Kd': continue
-				msg = ' '.join([str(v) for v in mtl[mtl_id][subkey]])	# tbd: string not handled
+				if subkey == 'map_Kd':
+					msg = mtl[mtl_id][subkey]
+				else:
+					msg = ' '.join([str(v) for v in mtl[mtl_id][subkey]])	
 				print >> f, '%s %s'%(subkey, msg)
 			print >> f, ''
 
@@ -114,7 +117,7 @@ if __name__ == '__main__':
 		exit(0)
 	# input 
 	voxpath = sys.argv[1]
-	if '.64.points.npy' in voxpath:
+	if 'points.' in voxpath:
 		points = np.load(voxpath)
 		vox = points2vox(points, 64)
 	else:
