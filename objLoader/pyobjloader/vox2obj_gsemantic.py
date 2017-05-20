@@ -4,7 +4,7 @@
 # vox.npy: vox or points
 
 import sys
-from os.path import join
+from os.path import join, split
 import numpy as np
 import random
 from skimage import io, color
@@ -113,16 +113,21 @@ def face2grid(v1,v2,v3,origin,scale):
 if __name__ == '__main__':
 	print sys.argv
 	if len(sys.argv)!=4:
-		print 'usage: python vox2obj.py vox.npy oldobj.obj output/path'
+		print 'usage: python vox2obj.py vox.npy oldobj.obj output/path/prefix'
 		exit(0)
 	# input 
 	voxpath = sys.argv[1]
-	if 'points.' in voxpath:
-		points = np.load(voxpath)
-		vox = points2vox(points, 64)
+	npy = np.load(voxpath)
+	shape = npy.shape
+	if len(shape)==2 and shape[1]==6:	# points
+		vox = points2vox(npy, 64)
+	elif len(shape)==4:					# voxels
+		vox = npy
 	else:
-		vox = np.load(voxpath)
-
+		print 'shape not supported', shape
+		exit(0)
+	
+	# lab -> rgb
 	vox[:,:,:,0] = vox[:,:,:,0]*100.0
 	vox[:,:,:,1] = vox[:,:,:,1]*115.0
 	vox[:,:,:,2] = vox[:,:,:,2]*115.0
@@ -149,10 +154,14 @@ if __name__ == '__main__':
 		v3 = obj.getVertex(vertex_ids[2])
 		grid_xyz_list = face2grid(v1,v2,v3,origin,scale)
 		for x,y,z in grid_xyz_list:
-			# if vox[x,y,z,3] == 0:					# if the xyz can't correpond to non-zero vox, 
-			# 	continue							# set it to black
 			rgb = vox[x,y,z,0:3]
 			key = (mtl_id, group_id)
+			# if xyz correpond to an empty vox, 
+			if vox[x,y,z,3] == 0:	
+				if key not in mtlkd_dict:
+					mtlkd_dict[key] = {}
+				continue
+			# if xyz correpond to a valid vox, 
 			if key in mtlkd_dict:
 				if (x,y,z) not in mtlkd_dict[key]:
 					mtlkd_dict[key][(x,y,z)] = rgb
@@ -164,19 +173,23 @@ if __name__ == '__main__':
 	# with open('log.txt','w') as f:
 	# 	print >> f, mtlkd_dict
 	for key in mtlkd_dict:
-		rgbs = np.array(mtlkd_dict[key].values())
-		print key, rgbs.shape
-		# mtlkd_dict[key] = np.mean(rgbs, axis=0)
-		mtlkd_dict[key] = np.median(rgbs, axis=0)
+		if len(mtlkd_dict[key]) == 0:
+			mtlkd_dict[key] = np.array([0,0,0])
+		else:
+			rgbs = np.array(mtlkd_dict[key].values())
+			print key, rgbs.shape
+			# mtlkd_dict[key] = np.mean(rgbs, axis=0)
+			mtlkd_dict[key] = np.median(rgbs, axis=0)
 
 
 	# compose new mtl file
-	new_mtl_name = join(output_path,'model_from_vox.mtl')
+	dirname, prefix = split(output_path)
+	new_mtl_name = join(dirname, prefix+'.mtl')
 	write2mtl(new_mtl_name, obj.mtl, mtlkd_dict)
 
 	# compose new obj file
-	new_obj_name = join(output_path,'model_from_vox.obj')
-	write2obj(old_obj_name, new_obj_name, 'model_from_vox.mtl', obj)
+	new_obj_name = join(dirname, prefix+'.obj')
+	write2obj(old_obj_name, new_obj_name, prefix+'.mtl', obj)
 	
 
 
