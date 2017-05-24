@@ -49,9 +49,15 @@ def write2pov(pov_path, obj, mtl_intid_dict):
 			Kd = obj.mtl[mtl_id]['Kd']
 			Ks = np.mean(obj.mtl[mtl_id]['Ks'])
 			Ka = np.mean(obj.mtl[mtl_id]['Ka'])
+			if 'd' in obj.mtl[mtl_id]:
+				d = 1-obj.mtl[mtl_id]['d'][0]
+			else:
+				d = 0
+			# d = 1-obj.mtl[mtl_id]['d'][0]
 			illum = np.mean(obj.mtl[mtl_id]['illum'])
 			f.write('      texture {\n')
-			f.write('        pigment { color rgb<%f,%f,%f>}\n'%(Kd[0],Kd[1],Kd[2]))
+			# f.write('        pigment { color rgb<%f,%f,%f>}\n'%(Kd[0],Kd[1],Kd[2]))
+			f.write('        pigment { color rgbt<%f,%f,%f,%f>}\n'%(Kd[0],Kd[1],Kd[2],d))		# warning, try transparency
 			f.write('        finish  { specular %f ambient %f phong %f}\n'%(Ks,Ka,illum))
 			f.write('      }\n')
 		f.write('   }\n')

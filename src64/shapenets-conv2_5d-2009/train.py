@@ -15,7 +15,7 @@ def prepare_batch_dict(data_dict):
     batch_label = np.zeros([batch_size, num_syn], dtype=np.float32) # (n,55)
     batch_label[np.array(range(0,batch_size)), batch_syn_id] = 1
     #print batch_label
-    batch_dict = {'rgba':batch_voxels, 'label': batch_label}
+    batch_dict = {'rgba':batch_voxels, 'label':batch_label, 'syn_id':batch_syn_id}
     return batch_dict
 
 def prepare_feed_dict(batch_dict, rgba, label, train, flag):
@@ -43,8 +43,8 @@ y = D(rgba, train)
 loss_D = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=label, logits=y))
 opt_D = tf.train.AdamOptimizer(learning_rate, beta1).minimize(loss_D)
 
-correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(label,1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(label,1))   # (n,1)
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))  # (1)
 
 print '\nepoch: ', myconfig.version
 

@@ -1,3 +1,6 @@
+import matplotlib 
+matplotlib.use('Agg')
+
 import _init_paths
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -48,11 +51,17 @@ def thread_func(sim_mat,all_points,all_paths,mini,maxi):
 		c_subpath_i = os.path.join(c_path_i,'mapped_labpoints')
 		if not os.path.exists(c_subpath_i):
 			os.makedirs(c_subpath_i)
+		else:
+			if len(os.listdir(c_subpath_i)) > 10:		# warning
+				print 'exists'
+				continue
+			# print 'exists'
+			# continue
 		print 'path i', c_subpath_i
 
 		# retrived the most similar shapes
 		c_sim = sim_mat[i,:]
-		top_sim_index = c_sim.argsort()[::-1][:5]
+		top_sim_index = c_sim.argsort()[::-1][:20]
 		start = time.time()
 		for j in top_sim_index:
 			# print "similarity:", c_sim[j]
@@ -110,6 +119,7 @@ def main():
 	###################################
 	# propagate color to similar shapes
 	###################################
+	N = min(2000,N) 	# warning, first 2000
 	THREAD_NUM = 9
 	try:
 		batch_size = N/THREAD_NUM

@@ -9,7 +9,7 @@ def bias_variable(name, shape):
 	return tf.get_variable(name, shape, initializer=tf.constant_initializer(0.1)),
 
 def addRandomNormal(x):
-	return x + tf.random_normal(x.get_shape().as_list(),stddev=1.0)
+	return x + tf.random_normal(x.get_shape().as_list(),stddev=0.1)
 
 def conv3d(x, W, stride=2):
 	return tf.nn.conv3d(x, W, strides=[1, stride, stride, stride, 1], padding='SAME')
@@ -77,15 +77,15 @@ class Generator(object):
 			self.dbn3 = batch_norm(name = 'dbn3')
 			self.dbn4 = batch_norm(name = 'dbn4')
 
-	def __call__(self, a, z, train):
-		shape = a.get_shape().as_list()		# (n,64,64,64,1)
+	def __call__(self, input_a, mask_a, z, train):
+		shape = input_a.get_shape().as_list()		# (n,64,64,64,1)
 		ngf = self.ngf
 
 		# conv
-		h1 = addRandomNormal(lrelu(conv3d(a,self.W['h1']) + self.b['h1']))	# (n,32,32,32,f)
-		h2 = addRandomNormal(lrelu(self.bn2(conv3d(h1,self.W['h2']), train))) # (n,16,16,16,f*2)
-		h3 = addRandomNormal(lrelu(self.bn3(conv3d(h2,self.W['h3']), train))) # (n,8,8,8,f*4)
-		h4 = addRandomNormal(lrelu(self.bn4(conv3d(h3,self.W['h4']), train))) # (n,4,4,4,f*8)
+		h1 = lrelu(conv3d(input_a,self.W['h1']) + self.b['h1'])	# (n,32,32,32,f)
+		h2 = lrelu(self.bn2(conv3d(h1,self.W['h2']), train)) # (n,16,16,16,f*2)
+		h3 = lrelu(self.bn3(conv3d(h2,self.W['h3']), train)) # (n,8,8,8,f*4)
+		h4 = lrelu(self.bn4(conv3d(h3,self.W['h4']), train)) # (n,4,4,4,f*8)
 		h5 = lrelu(self.bn5(conv3d(h4,self.W['h5']), train)) # (n,2,2,2,f*16)
 
 		# add z
@@ -105,20 +105,26 @@ class Generator(object):
 		rgb = tf.nn.tanh(deconv3d(dh4, self.W['dh5'], [shape[0], 64,64,64,3]) + self.b['dh5']) 	#(n,64,64,64,3)
 
 		# mask
-		rgb = mask(rgb,a)
-		rgba = tf.concat([rgb,a], -1)
+		rgb = mask(rgb,mask_a)
+		rgba = tf.concat([rgb,mask_a], -1)
 
 		return rgb, rgba
 
-	# all_z: variable
-	def train(self, a, indexes, all_z, train):
-		z = tf.gather(all_z, indexes)
-		return self.__call__(a, z, train)
+	# # all_z: variable
+	# def train(self, a, indexes, all_z, train):
+	# 	z = tf.gather(all_z, indexes)
+	# 	return self.__call__(a, None, z, train)
 
-	# random_z: placeholder
-	def sample(self, a, random_z, train):
-		assert tf.get_variable_scope().reuse == False
-		return self.__call__(a, random_z, train)
+	# 
+	def fix_shape(self, a, mask_a, indexes, all_z, train):
+		z = tf.gather(all_z, indexes)
+		self.z = z
+		return self.__call__(a, mask_a, z, train)
+
+	# # random_z: placeholder
+	# def sample(self, a, random_z, train):
+	# 	assert tf.get_variable_scope().reuse == False
+	# 	return self.__call__(a, None, random_z, train)
 
 	# def fix_shape(self, a, indexes, all_z, train):
 	# 	assert tf.get_variable_scope().reuse == False
@@ -132,16 +138,16 @@ class Generator(object):
 
 def mask(rgb, a):
 ### rgb \in (-1,1), (batch, 32, 32, 32, 3)
-### a \in {-1,1},	   (batch, 32, 32, 32, 1)
+### a \in {0,1},	   (batch, 32, 32, 32, 1)
 # (-1,1) -> (0,1)
-	rgb = rgb*0.5 + 0.5
-	a = a*0.5 + 0.5
+	# rgb = rgb*0.5 + 0.5
+	# a = a*0.5 + 0.5
 	# mask
-	rep_a = tf.concat([a,a,a], 4)
+	rep_a = tf.concat([a,a,a], -1)
 	rgb = tf.multiply(rgb,rep_a)
 	#rgba = tf.concat([rgb,a], 4)
 	# (0,1) -> (-1,1)
-	rgb = (rgb-0.5)*2
+	# rgb = (rgb-0.5)*2
 
 	return rgb
 

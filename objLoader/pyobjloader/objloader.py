@@ -7,6 +7,7 @@ from os.path import dirname, join, isfile
 #		"Ns":[double],
 #		"Ks":[double, double, double],
 #		"Kd":[double, double, double],
+#		"d": [double], 
 #		"map_Kd":string
 #		"image": numpy.ndarray}
 

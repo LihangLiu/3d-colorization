@@ -506,13 +506,30 @@ epoch 3005:
 epoch 3006:
 	3003: fix_shape
 		remove noise
-	-tbd: wrong mask need to be fixed
+	
 		
 epoch 3007:
 	3003: l1 loss
 		remove noise
 		ngf = 15 <- 9
 	-seems overfitting
+
+epoch 3008:
+	3006: fix_shape
+	mapped data
+	lr=0.001
+
+epoch 3009:
+	3006: fix_shape
+	mapped data
+	300 train models
+	G: .0031->.00081, 1000 iters
+	z: 	lr=0.001, .0028->.0019, 500 iters
+		lr=0.01,  .0028->.0014, 500 iters, converge
+		lr=0.1,   .0028->.0014, 300 iters, converge
+		lr=0.01,   .015*32->.008*32
+		30 a,100 random z, 0.380->0.276
+		32 a,1 random z,   0.487->0.2713
 
 # # # # # # # # # # # #
 # VAE-CWGAN
@@ -539,6 +556,67 @@ epoch 3013:
 	3012: l1 loss + cgan
 		lr: 1:10
 		run cgan first, original bn vbn
+
+# # # # # # # # # # # #
+# VAE-HOURGLASS
+# # # # # # # # # # # #
+
+epoch 3020:
+	num_feature=64, num_stack=1
+	lr=0.001
+
+epoch 3021:
+	num_feature=64, num_stack=1
+	lr=0.0001
+
+epoch 3020:
+	num_feature=64, num_stack=2
+	lr=0.001
+
+# # # # # # # # # # # #
+# For publication
+# # # # # # # # # # # #
+
+epoch 4000:
+	3009: fix-shape on  airplane
+	mapping points, 300 train models
+
+epoch 4001:
+	3009: fix-shape on  chair
+	mapping points, 300 train models
+
+epoch 4002:
+	3009: fix-shape on  motorbike
+	mapping points, 300 train models
+
+epoch 4003:
+	3009: fix-shape on  pistol
+	mapping points, 300 train models
+
+epoch 4004:
+	3009: fix-shape on  bottle
+	mapping points, 300 train models
+
+epoch 4005:
+	3009: fix-shape on  cap
+	mapping points, 300 train models
+
+
+epoch 4010:
+	cwgan, car
+	mapping points, all train models
+
+epoch 4011:
+	cwgan, airplane
+	mapping points, all train models
+
+epoch 4012:
+	cwgan, chair
+	mapping points, all train models
+
+
+motorbike, chair, pistol, car, airplane, bottle, cap
+
 
 
 

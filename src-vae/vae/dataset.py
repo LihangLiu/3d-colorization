@@ -9,21 +9,27 @@ import numpy as np
 from scipy.misc import imread
 from os.path import dirname
 import os
+from os import listdir
 import sys
 import time
+from skimage import io, color
 
 import random
 
 
 class Dataset:
 
-	def __init__(self, dataset_path):
+	def __init__(self, dataset_path, max_num=None, using_map=True):
 		self.name = "real,"
+		self.using_map = using_map
 		print "dataset is ", self.name
 		print dataset_path
 
 		self.index_in_epoch = 0
-		self.examples = np.array(self.read_txt(dataset_path))
+		if max_num is None:
+			self.examples = np.array(self.read_txt(dataset_path))
+		else:
+			self.examples = np.array(self.read_txt(dataset_path))[:max_num]
 		self.num_examples = len(self.examples)
 		print 'total size: ', self.num_examples
 		self.shuffle_index = range(0, len(self.examples))
@@ -60,18 +66,21 @@ class Dataset:
 	def read_data(self, start, end):
 		batch = {'rgba':[]}
 		for fname in self.examples[start:end]:
-			if '64.points.npy' in fname:
+			if not self.using_map:
+				# original points
 				points = np.load(fname)
 				vox = points2vox(points,64)
-			elif '32.points.npy' in fname:
-				points = np.load(fname)
-				vox = points2vox(points,32)
 			else:
-				vox = np.load(fname)
-			vox = transformTo(vox)
+				# mapped points
+				c_dir = os.path.dirname(fname)
+				c_dir = os.path.join(c_dir,'mapped_labpoints')
+				mapped_fnames = [os.path.join(c_dir,f) for f in listdir(c_dir) if '.npy' in f]
+				points = np.load(np.random.choice(mapped_fnames))
+				vox = points2vox(points,64)
+
 			batch['rgba'].append(vox)
 
-		batch['rgba'] = np.array(batch['rgba'])
+		batch['rgba'] = np.array(batch['rgba'])			# (32,64,64,64,4)
 		batch['index'] = np.array(self.shuffle_index[start:end])
 		return batch
 
@@ -132,6 +141,19 @@ def getPoints(vox):
 	rgbs = vox[xs,ys,zs,0:3]
 	return xs,ys,zs,rgbs
 
+def saveConcatVoxes2image(voxes, imname):
+	sub_names = []
+	for i,labvox in enumerate(voxes): 
+		# print i,vox
+		sub_name = "tmp/tmp-%d.jpg"%(i)
+		vox = labvox2vox(labvox)
+		vox2image(vox, sub_name)
+		sub_names.append(sub_name)
+	concatenateImages(sub_names, imname)
+	print imname
+	for name in sub_names:
+		os.remove(name)
+
 def concatenateImages(imname_list,out_imname):
 	N = len(imname_list)
 	W = 4
@@ -142,19 +164,33 @@ def concatenateImages(imname_list,out_imname):
 		plt.imshow(img)
 	plt.savefig(out_imname,dpi=1000)
 	plt.close()
-	
+
+def labvox2vox(vox):
+	vox[:,:,:,0] = vox[:,:,:,0]*100.0
+	vox[:,:,:,1] = vox[:,:,:,1]*115.0
+	vox[:,:,:,2] = vox[:,:,:,2]*115.0
+	subvox = np.reshape(vox[:,:,:,0:3],[1,-1,3])
+	subvox = color.lab2rgb(np.array(subvox,np.float64))	# float32->float64, bug otherwise
+	subvox = np.reshape(subvox,[64,64,64,3])
+	vox[:,:,:,0:3] = subvox
+	return vox	
 
 def vox2image(vox,imname):
 	# draw 
 	fig = plt.figure()
 	ax = fig.gca(projection='3d')
 	ax.set_aspect("equal")
-	dim = vox.shape[0]
-	ax.set_xlim(0, dim)
-	ax.set_ylim(0, dim)
-	ax.set_zlim(0, dim)
+	X = vox.shape[0]
+	Y = vox.shape[1]
+	Z = vox.shape[2]
+	ax.set_xlim(0, X)
+	ax.set_ylim(0, Y)
+	ax.set_zlim(0, Z)
+	ax.set_xlabel('X')
+	ax.set_ylabel('Y')
+	ax.set_zlabel('Z')
 	xs,ys,zs,rgbs = getPoints(vox)
-	ax.scatter(xs,dim-1-ys, dim-1-zs, color=rgbs) #, s=5)
+	ax.scatter(xs,Y-1-ys, Z-1-zs, color=rgbs, s=5)
 
 	plt.savefig(imname)
 	plt.close(fig)

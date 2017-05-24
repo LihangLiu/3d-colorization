@@ -43,14 +43,14 @@ Environment=LD_LIBRARY_PATH=/u/leonliu/repos/cuDNN:/u/leonliu/repos/cuDNN/lib64:
 Universe=vanilla
 Getenv=True
 
-Log=../../outputs/log/log.$(Cluster).$(Process) 
-Output=../../outputs/log/out.$(Cluster).$(Process) 
-Error=../../outputs/log/err.$(Cluster).$(Process)
-Executable=%s
+Log=../../outputs/log/log.{0}.$(Cluster).$(Process) 
+Output=../../outputs/log/out.{0}.$(Cluster).$(Process) 
+Error=../../outputs/log/err.{0}.$(Cluster).$(Process)
+Executable={1}
 
 
 Queue 1
-""" % (Executable_file)
+""".format(config.version,Executable_file)
 
 
 with open('condor_submit', 'w') as f:
@@ -59,8 +59,8 @@ print 'condor_submit generated'
 
 with open(Executable_file, 'w') as f:
 	f.write("""#!/bin/bash
-python train.py
-
+# python train.py
+python train_z.py
 """)
 print Executable_file, 'generated'
 os.system('chmod 755 %s'%(Executable_file))
