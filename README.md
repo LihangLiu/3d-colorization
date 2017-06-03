@@ -1,30 +1,36 @@
-# Condor Usage
+# 3D Colorization
+This repository contains implementations of several algorithms for 3d volume colorization. To run the code, you should have the tensorflow installed in your python.
 
-submit job to condor: 
+## Algorithms for 3d volume colorization
+
+### cwgan 
+<a href="https://arxiv.org/abs/1701.07875">Conditional Wasserstein GAN</a>. To run:
+
+    cd src64/cwgan
+    python train.py
     
-    condor_submit configure_file
+### cwgan with surface kernel
+Still in process. To run:
 
-show your jobs: 
+    cd src64/cwgan-conv2_5d
+    python train.py
 
-    condor_q -submitter username
+### vae 
+Variational Autoencoder. To run:
 
-show all jobs: 
+    cd src-vae/vae
+    python train.py
 
-    condor_q -g -run | grep eldar
+### began
+<a href="https://arxiv.org/abs/1703.10717">Boundary Equibilibrium GAN</a>. To run:
 
-cancel job: 
+    cd src64/began
+    python train.py
+    
+### hourglass
+Meomory limitations issue. To run:
 
-    condor_rm jobid
-
-edit condor_submit before your submission!
-change eldar-xx in 'condor_submit' depends on current jobs on the machines. Find a machine with no job runnig. Also, eldar 20-29 are better than others.
-
-
-# VoxelDCGAN
-
-Implementation of a 3D shape generative model based on <a href="https://arxiv.org/abs/1511.06434">deep convolutional generative adversarial nets</a> (DCGAN) with techniques of <a href="https://github.com/openai/improved-gan">improved-gan</a>.
-
-Experimental results on the <a href="http://shapenet.cs.stanford.edu/">ShapeNet</a> dataset are shown below.
-
+    cd src-vae
+    python train.py
 
 
