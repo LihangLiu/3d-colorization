@@ -1,5 +1,8 @@
 # 3D Colorization
-This repository contains implementations of several algorithms for 3d volume colorization. To run the code, you should have the tensorflow installed in your python.
+This repository contains implementations of several algorithms for 3d volume colorization. To run the code, you should have the tensorflow installed in your python. 
+
+## dataset
+Our model takes the 3d voxel representations as input. We used <a href="https://arxiv.org/abs/1512.03012">Shapenet Core dataset</a> for training. Before training, the conversion from obj format to voxel representations is required and implenmented under the 3d-colorization/objLoader directory. The dataset can't be provided directly due to license limitations. Please contact the Shapenet team for dataset downloading. 
 
 ## Algorithms for 3d volume colorization
 
