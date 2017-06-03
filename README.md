@@ -31,7 +31,7 @@ Variational Autoencoder. To run:
     python train.py
     
 ### hourglass
-Meomory limitations issue. To run:
+<a href="https://arxiv.org/abs/1603.06937">Stacked Hourglass Networks</a>. Only two stacks due to the meomory limitation issue. To run:
 
     cd src-vae
     python train.py
