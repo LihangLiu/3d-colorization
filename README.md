@@ -19,7 +19,7 @@ Still in process. To run:
     python train.py
 
 ### vae 
-Variational Autoencoder. To run:
+<a href="https://arxiv.org/abs/1606.05908">Variational Autoencoder</a>. To run:
 
     cd src-vae/vae
     python train.py
