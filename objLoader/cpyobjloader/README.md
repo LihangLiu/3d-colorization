@@ -5,7 +5,8 @@
 	python setup.py install --user
 
 ## Usage
-	python obj2vox.py path/to/objfile.obj path/to/savednpy.npy
+	cd parent/path/of/objfile/
+	python path/to/obj2vox.py objfile.obj savednpy.npy
 
 ## Batch conversion
   convert all .obj of a given directory to .npy(32,32,32,4) and place in the same directory
